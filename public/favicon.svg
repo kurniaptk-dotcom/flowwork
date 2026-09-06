@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <defs>
+    <linearGradient id="flowGrad" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#6366f1"/>
+      <stop offset="0.5" stop-color="#8b5cf6"/>
+      <stop offset="1" stop-color="#06b6d4"/>
+    </linearGradient>
+    <linearGradient id="glowGrad" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#ffffff" stop-opacity="0.3"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="16" fill="url(#flowGrad)"/>
+  <rect x="1" y="1" width="62" height="62" rx="15" stroke="url(#glowGrad)" stroke-width="2"/>
+  <path d="M20 18H44C45.1 18 46 18.9 46 20V24C46 25.1 45.1 26 44 26H28V30H40C41.1 30 42 30.9 42 32V36C42 37.1 41.1 38 40 38H28V46C28 47.1 27.1 48 26 48H22C20.9 48 20 47.1 20 46V20C20 18.9 20.9 18 22 18H20Z" fill="white"/>
+  <circle cx="45" cy="45" r="4.5" fill="#10b981"/>
+</svg>

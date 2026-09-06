@@ -1,0 +1,565 @@
+/* ClickUp 3.0 Signature Theme & Layout Styles */
+
+:root,
+[data-theme='light'] {
+  --cu-navy-rail: #ffffff;
+  --cu-navy-rail-hover: #f1f5f9;
+  --cu-navy-rail-active: #e2e8f0;
+  --cu-primary-blue: #6366f1;
+  --cu-primary-blue-hover: #4f46e5;
+  --cu-blue-gradient: linear-gradient(135deg, #6366f1 0%, #06b6d4 100%);
+  --cu-brain-gradient: linear-gradient(135deg, #6366f1 0%, #06b6d4 50%, #10b981 100%);
+  --cu-sidebar-bg: #ffffff;
+  --cu-sidebar-border: #e2e8f0;
+  --cu-main-bg: #f8fafc;
+  --cu-card-bg: #ffffff;
+  --cu-text-main: #0f172a;
+  --cu-text-subtle: #475569;
+  --cu-text-muted: #94a3b8;
+  --cu-border: #e2e8f0;
+  --cu-banner-bg: #6366f1;
+  --cu-rail-width: 56px;
+  --cu-subsidebar-width: 230px;
+}
+
+[data-theme='dark'] {
+  --cu-navy-rail: #0b1120;
+  --cu-navy-rail-hover: #162038;
+  --cu-navy-rail-active: #1e293b;
+  --cu-primary-blue: #6366f1;
+  --cu-primary-blue-hover: #4f46e5;
+  --cu-sidebar-bg: #0e1526;
+  --cu-sidebar-border: rgba(255, 255, 255, 0.08);
+  --cu-main-bg: #090d16;
+  --cu-card-bg: #121a2e;
+  --cu-text-main: #f8fafc;
+  --cu-text-subtle: #94a3b8;
+  --cu-text-muted: #64748b;
+  --cu-border: rgba(255, 255, 255, 0.08);
+}
+
+/* App ClickUp Shell */
+.clickup-app-shell {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  background-color: var(--cu-main-bg);
+  font-family: var(--font-sans);
+}
+
+/* 1. Slim Left Navy Icon Rail */
+.clickup-rail {
+  width: var(--cu-rail-width);
+  height: 100vh;
+  background-color: var(--cu-navy-rail);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 0 16px 0;
+  flex-shrink: 0;
+  z-index: 50;
+  user-select: none;
+}
+
+.rail-top-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+}
+
+.workspace-initial-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background-color: #00a884;
+  color: #ffffff;
+  font-weight: 800;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  transition: transform var(--transition-fast);
+}
+
+.workspace-initial-avatar:hover {
+  transform: scale(1.05);
+}
+
+.rail-nav-list {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.rail-nav-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #8c9ba5;
+  background: transparent;
+  transition: all var(--transition-fast);
+  position: relative;
+  font-size: 0.65rem;
+  gap: 2px;
+}
+
+.rail-nav-btn:hover {
+  color: #ffffff;
+  background-color: var(--cu-navy-rail-hover);
+}
+
+.rail-nav-btn.active {
+  color: #ffffff;
+  background-color: #1e2952;
+}
+
+.rail-nav-btn.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 10px;
+  bottom: 10px;
+  width: 3px;
+  border-radius: 0 4px 4px 0;
+  background-color: var(--cu-primary-blue);
+}
+
+.rail-bottom-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+
+/* 2. Secondary ClickUp Sub-Sidebar */
+.clickup-subsidebar {
+  width: var(--cu-subsidebar-width);
+  height: 100vh;
+  background-color: var(--cu-sidebar-bg);
+  border-right: 1px solid var(--cu-sidebar-border);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  z-index: 40;
+  overflow-y: auto;
+  transition: width var(--transition-normal);
+}
+
+.clickup-subsidebar.hidden {
+  width: 0;
+  overflow: hidden;
+  border-right: none;
+}
+
+.subsidebar-header {
+  padding: 14px 16px 10px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.subsidebar-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--cu-text-main);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.clickup-create-btn {
+  background: var(--cu-primary-blue);
+  color: #ffffff;
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 0.84rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: background var(--transition-fast), transform var(--transition-fast);
+  box-shadow: 0 2px 6px rgba(0, 102, 255, 0.25);
+}
+
+.clickup-create-btn:hover {
+  background: var(--cu-primary-blue-hover);
+  transform: translateY(-1px);
+}
+
+.subsidebar-section {
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.subsidebar-section-title {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--cu-text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 6px;
+  margin-bottom: 2px;
+}
+
+.subsidebar-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 10px;
+  border-radius: 6px;
+  color: var(--cu-text-subtle);
+  font-size: 0.86rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.subsidebar-item:hover {
+  background-color: rgba(0, 102, 255, 0.05);
+  color: var(--cu-text-main);
+}
+
+.subsidebar-item.active {
+  background-color: rgba(0, 102, 255, 0.1);
+  color: var(--cu-primary-blue);
+  font-weight: 600;
+}
+
+/* 3. Top Header Bar */
+.clickup-header {
+  height: 52px;
+  background-color: var(--cu-sidebar-bg);
+  border-bottom: 1px solid var(--cu-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  flex-shrink: 0;
+  gap: 16px;
+}
+
+.clickup-workspace-dropdown {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  font-size: 0.92rem;
+  color: var(--cu-text-main);
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: background-color var(--transition-fast);
+}
+
+.clickup-workspace-dropdown:hover {
+  background-color: var(--cu-main-bg);
+}
+
+.clickup-search-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: var(--cu-main-bg);
+  border: 1px solid var(--cu-border);
+  border-radius: 8px;
+  padding: 6px 14px;
+  width: 320px;
+  color: var(--cu-text-muted);
+  font-size: 0.84rem;
+  cursor: text;
+}
+
+.clickup-search-pill:focus-within {
+  border-color: var(--cu-primary-blue);
+  box-shadow: 0 0 0 2px rgba(0, 102, 255, 0.2);
+}
+
+.clickup-search-pill input {
+  border: none;
+  background: transparent;
+  color: var(--cu-text-main);
+  width: 100%;
+  outline: none;
+  font-size: 0.84rem;
+}
+
+.clickup-ai-pill-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: rgba(255, 0, 127, 0.08);
+  color: #ff007f;
+  font-size: 0.8rem;
+  font-weight: 600;
+  border: 1px solid rgba(255, 0, 127, 0.2);
+  transition: all var(--transition-fast);
+}
+
+.clickup-ai-pill-btn:hover {
+  background: rgba(255, 0, 127, 0.15);
+}
+
+/* Blue Notification Banner */
+.clickup-alert-banner {
+  background-color: var(--cu-banner-bg);
+  color: #ffffff;
+  padding: 8px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.84rem;
+  font-weight: 500;
+}
+
+.clickup-banner-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.clickup-banner-btn {
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  padding: 3px 10px;
+  border-radius: 4px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  transition: background var(--transition-fast);
+}
+
+.clickup-banner-btn:hover {
+  background: rgba(255, 255, 255, 0.35);
+}
+
+/* 4. ClickUp Brain AI Interface (/ai/brain) */
+.clickup-brain-container {
+  flex: 1;
+  overflow-y: auto;
+  padding: 40px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 860px;
+  margin: 0 auto;
+  width: 100%;
+  gap: 28px;
+}
+
+.brain-logo-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 2.4rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--cu-text-main);
+}
+
+.brain-flower-icon {
+  width: 44px;
+  height: 44px;
+  background: var(--cu-brain-gradient);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  box-shadow: 0 4px 20px rgba(121, 40, 202, 0.35);
+}
+
+.brain-mode-toggle {
+  display: flex;
+  gap: 6px;
+  background: var(--cu-sidebar-bg);
+  padding: 4px;
+  border-radius: 10px;
+  border: 1px solid var(--cu-border);
+}
+
+.brain-mode-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 18px;
+  border-radius: 6px;
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: var(--cu-text-subtle);
+  transition: all var(--transition-fast);
+}
+
+.brain-mode-btn.active {
+  background: var(--cu-main-bg);
+  color: var(--cu-text-main);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.brain-prompt-card {
+  width: 100%;
+  background: var(--cu-card-bg);
+  border: 1px solid var(--cu-border);
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.brain-textarea {
+  width: 100%;
+  background: transparent;
+  border: none;
+  font-size: 1.05rem;
+  color: var(--cu-text-main);
+  outline: none;
+  resize: none;
+  min-height: 80px;
+  font-family: inherit;
+}
+
+.brain-card-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 12px;
+  border-top: 1px solid var(--cu-border);
+}
+
+.brain-chips-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+  width: 100%;
+}
+
+.brain-chip {
+  background: var(--cu-card-bg);
+  border: 1px solid var(--cu-border);
+  border-radius: 10px;
+  padding: 14px 16px;
+  font-size: 0.86rem;
+  color: var(--cu-text-subtle);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  text-align: left;
+}
+
+.brain-chip:hover {
+  border-color: #7928ca;
+  background: rgba(121, 40, 202, 0.04);
+  color: var(--cu-text-main);
+  transform: translateY(-2px);
+}
+
+/* 5. ClickUp Inbox View (/inbox) */
+.clickup-inbox-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.inbox-subtabs-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  border-bottom: 1px solid var(--cu-border);
+  background: var(--cu-sidebar-bg);
+  height: 48px;
+}
+
+.inbox-tabs {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  height: 100%;
+}
+
+.inbox-tab-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--cu-text-subtle);
+  cursor: pointer;
+  position: relative;
+  height: 100%;
+}
+
+.inbox-tab-item:hover {
+  color: var(--cu-text-main);
+}
+
+.inbox-tab-item.active {
+  color: var(--cu-text-main);
+}
+
+.inbox-tab-item.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background-color: var(--cu-text-main);
+  border-radius: 2px 2px 0 0;
+}
+
+.inbox-content-area {
+  flex: 1;
+  overflow-y: auto;
+  padding: 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 6. ClickUp Dashboards Hub Carousel (/dashboards) */
+.dashboards-carousel {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.dashboard-template-card {
+  background: var(--cu-card-bg);
+  border: 1px solid var(--cu-border);
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.dashboard-template-card:hover {
+  border-color: var(--cu-primary-blue);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+  transform: translateY(-2px);
+}
