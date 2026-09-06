@@ -32,6 +32,7 @@ import UpgradePlanModal from './components/UpgradePlanModal';
 import MemberDetailModal from './components/MemberDetailModal';
 import { CommandPaletteModal } from './components/CommandPaletteModal';
 import { EditSpaceModal } from './components/EditSpaceModal';
+import { EditWorkspaceModal } from './components/EditWorkspaceModal';
 import { BulkActionBar } from './components/BulkActionBar';
 import { ExportModal } from './components/ExportModal';
 import { ShortcutsModal } from './components/ShortcutsModal';
@@ -48,7 +49,8 @@ import {
   cloudUpsertTask,
   cloudDeleteTask,
   cloudSyncBatchTasks,
-  cloudSubscribeTasks
+  cloudSubscribeTasks,
+  cloudDeleteWorkspaceTasks
 } from './utils/supabaseClient';
 import { createActivityLog } from './utils/activityHelper';
 import {
@@ -299,6 +301,11 @@ export function App() {
   const [isEditSpaceModalOpen, setIsEditSpaceModalOpen] = useState(false);
   const [editingSpace, setEditingSpace] = useState(null);
   const [deleteSpaceConfirm, setDeleteSpaceConfirm] = useState({ isOpen: false, space: null });
+
+  // Workspace Modal states (Edit & Delete)
+  const [isEditWorkspaceModalOpen, setIsEditWorkspaceModalOpen] = useState(false);
+  const [editingWorkspace, setEditingWorkspace] = useState(null);
+  const [deleteWorkspaceConfirm, setDeleteWorkspaceConfirm] = useState({ isOpen: false, workspace: null });
 
   // Bulk / Multi-select Task Actions state
   const [selectedTaskIds, setSelectedTaskIds] = useState([]);
@@ -830,6 +837,94 @@ export function App() {
     setAssigneeFilter('all');
 
     addToast(`Workspace "${cleanName}" berhasil dibuat & aktif! 🎉`, 'success');
+  };
+
+  const handleOpenEditWorkspace = (ws = null) => {
+    // If ws is null, it means we are editing the currently active workspace, or creating new
+    setEditingWorkspace(ws || activeWorkspace);
+    setIsEditWorkspaceModalOpen(true);
+  };
+
+  const handleSaveWorkspace = (wsData) => {
+    const exists = workspaces.some((w) => w.id === wsData.id);
+    if (exists) {
+      setWorkspaces((prev) =>
+        prev.map((w) =>
+          w.id === wsData.id
+            ? {
+                ...w,
+                name: wsData.name,
+                icon: wsData.icon || w.icon,
+                color: wsData.color || w.color,
+                description: wsData.description !== undefined ? wsData.description : w.description
+              }
+            : w
+        )
+      );
+      addToast(`Ruang kerja "${wsData.name}" berhasil diperbarui! ✨`, 'success');
+    } else {
+      // Create new workspace
+      const newWs = {
+        id: wsData.id || `ws-${Date.now()}`,
+        name: wsData.name,
+        role: 'Owner',
+        icon: wsData.icon || '🚀',
+        color: wsData.color || '#00a884',
+        description: wsData.description || 'Workspace kustom baru'
+      };
+      const updated = [...workspaces, newWs];
+      setWorkspaces(updated);
+      handleSwitchWorkspace(newWs.id);
+      addToast(`Ruang kerja "${newWs.name}" berhasil dibuat & aktif! 🎉`, 'success');
+    }
+  };
+
+  const handleRequestDeleteWorkspace = (ws) => {
+    if (workspaces.length <= 1) {
+      addToast('Minimal harus ada 1 ruang kerja! Tidak dapat menghapus ruang kerja terakhir.', 'warning');
+      return;
+    }
+    const targetWs = ws || activeWorkspace;
+    setDeleteWorkspaceConfirm({ isOpen: true, workspace: targetWs });
+  };
+
+  const handleConfirmDeleteWorkspace = () => {
+    const targetWs = deleteWorkspaceConfirm.workspace;
+    if (!targetWs) return;
+
+    const targetId = targetWs.id;
+    const remaining = workspaces.filter((w) => w.id !== targetId);
+
+    if (remaining.length === 0) {
+      addToast('Tidak dapat menghapus seluruh ruang kerja!', 'warning');
+      setDeleteWorkspaceConfirm({ isOpen: false, workspace: null });
+      return;
+    }
+
+    // If currently on the deleted workspace, switch to the first remaining one
+    if (targetId === activeWorkspaceId) {
+      const nextWs = remaining[0];
+      handleSwitchWorkspace(nextWs.id);
+    }
+
+    setWorkspaces(remaining);
+
+    // Clean up local cache
+    try {
+      const uPrefix = currentUser?.id ? `u_${currentUser.id}` : 'u_guest';
+      localStorage.removeItem(`flowwork_${uPrefix}_data_${targetId}`);
+      localStorage.removeItem(`flowwork_data_${targetId}`);
+    } catch (e) {
+      console.error(e);
+    }
+
+    // Clean up Supabase cloud tasks
+    if (isSupabaseConfigured && currentUser?.isCloud) {
+      cloudDeleteWorkspaceTasks(targetId);
+    }
+
+    setDeleteWorkspaceConfirm({ isOpen: false, workspace: null });
+    addToast(`Ruang kerja "${targetWs.name}" berhasil dihapus.`, 'info');
   };
 
   // Bulk Selection Handlers
@@ -1840,6 +1935,8 @@ export function App() {
             if (t) handleTaskClick(t);
           }}
           cloudSyncStatus={cloudSyncStatus}
+          onOpenEditWorkspace={handleOpenEditWorkspace}
+          onOpenDeleteWorkspace={handleRequestDeleteWorkspace}
         />
 
         {/* Dynamic Module Content */}
@@ -2461,6 +2558,33 @@ export function App() {
         currentUser={currentUser}
         onUpdateUser={handleUpdateUserProfile}
         onShowToast={addToast}
+      />
+
+      {/* Edit / Create Workspace Modal */}
+      <EditWorkspaceModal
+        isOpen={isEditWorkspaceModalOpen}
+        onClose={() => {
+          setIsEditWorkspaceModalOpen(false);
+          setEditingWorkspace(null);
+        }}
+        workspace={editingWorkspace}
+        onSave={handleSaveWorkspace}
+        onDelete={(ws) => {
+          setIsEditWorkspaceModalOpen(false);
+          handleRequestDeleteWorkspace(ws);
+        }}
+        canDelete={workspaces.length > 1}
+      />
+
+      {/* Confirm Delete Workspace Modal */}
+      <ConfirmModal
+        isOpen={deleteWorkspaceConfirm.isOpen}
+        onClose={() => setDeleteWorkspaceConfirm({ isOpen: false, workspace: null })}
+        onConfirm={handleConfirmDeleteWorkspace}
+        title={`Hapus Ruang Kerja "${deleteWorkspaceConfirm.workspace?.name || ''}"?`}
+        message={`Apakah Anda yakin ingin menghapus ruang kerja "${deleteWorkspaceConfirm.workspace?.name || ''}"? Seluruh daftar tugas dan proyek di ruang kerja ini akan dihapus. Tindakan ini tidak dapat dibatalkan.`}
+        confirmText="Hapus Ruang Kerja"
+        confirmVariant="danger"
       />
 
       {/* Toast Notifications */}

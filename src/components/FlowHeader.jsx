@@ -22,7 +22,9 @@ import {
   Upload,
   Menu,
   Cloud,
-  RefreshCw
+  RefreshCw,
+  Edit3,
+  Trash2
 } from 'lucide-react';
 
 export const FlowHeader = ({
@@ -54,7 +56,9 @@ export const FlowHeader = ({
   currentUser,
   onLogout,
   onOpenProfile,
-  cloudSyncStatus = 'synced'
+  cloudSyncStatus = 'synced',
+  onOpenEditWorkspace,
+  onOpenDeleteWorkspace
 }) => {
   const [showWorkspaceMenu, setShowWorkspaceMenu] = useState(false);
   const [showNotificationMenu, setShowNotificationMenu] = useState(false);
@@ -186,14 +190,40 @@ export const FlowHeader = ({
                 animation: 'fadeIn 0.12s ease'
               }}
             >
-              <div style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', color: 'var(--flow-text-muted)', padding: '4px 8px' }}>
-                Pilih Ruang Kerja
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '4px 8px', marginBottom: 4 }}>
+                <span style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', color: 'var(--flow-text-muted)' }}>
+                  Pilih Ruang Kerja
+                </span>
+                {onOpenEditWorkspace && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowWorkspaceMenu(false);
+                      onOpenEditWorkspace(null);
+                    }}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      color: 'var(--flow-primary)',
+                      fontSize: '0.74rem',
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      padding: '2px 6px',
+                      borderRadius: 4
+                    }}
+                    title="Tambah Ruang Kerja Baru"
+                  >
+                    + Baru
+                  </button>
+                )}
               </div>
+
               {displayWorkspaces.map((ws) => {
                 const isActive = ws.id === activeWorkspaceId || ws.name === workspaceName;
                 return (
                   <div
                     key={ws.id}
+                    className="workspace-item-row"
                     style={{
                       display: 'flex',
                       alignItems: 'center',
@@ -205,7 +235,8 @@ export const FlowHeader = ({
                       color: isActive ? 'var(--flow-primary)' : 'var(--flow-text-main)',
                       fontWeight: isActive ? 600 : 500,
                       fontSize: '0.84rem',
-                      marginBottom: 2
+                      marginBottom: 2,
+                      transition: 'background 0.12s ease'
                     }}
                     onClick={() => {
                       if (onSwitchWorkspace) {
@@ -217,9 +248,9 @@ export const FlowHeader = ({
                       setShowWorkspaceMenu(false);
                     }}
                   >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, overflow: 'hidden' }}>
-                      <span style={{ fontSize: '1.05rem', flexShrink: 0 }}>{ws.icon || '🏢'}</span>
-                      <div style={{ textAlign: 'left', overflow: 'hidden' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, overflow: 'hidden', flex: 1, minWidth: 0 }}>
+                      <span style={{ fontSize: '1.1rem', flexShrink: 0 }}>{ws.icon || '🏢'}</span>
+                      <div style={{ textAlign: 'left', overflow: 'hidden', flex: 1, minWidth: 0 }}>
                         <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{ws.name}</div>
                         {ws.description && (
                           <div style={{ fontSize: '0.72rem', color: 'var(--flow-text-muted)', fontWeight: 400, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
@@ -228,7 +259,65 @@ export const FlowHeader = ({
                         )}
                       </div>
                     </div>
-                    {isActive && <Check size={15} color="var(--flow-primary)" style={{ flexShrink: 0, marginLeft: 6 }} />}
+
+                    <div
+                      style={{ display: 'flex', alignItems: 'center', gap: 4, flexShrink: 0, marginLeft: 6 }}
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      {/* Tombol Edit Ruang Kerja */}
+                      <button
+                        type="button"
+                        className="icon-btn"
+                        title={`Edit "${ws.name}"`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setShowWorkspaceMenu(false);
+                          if (onOpenEditWorkspace) onOpenEditWorkspace(ws);
+                        }}
+                        style={{
+                          width: 26,
+                          height: 26,
+                          padding: 0,
+                          borderRadius: 6,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          color: 'var(--flow-text-subtle)'
+                        }}
+                      >
+                        <Edit3 size={13} />
+                      </button>
+
+                      {/* Tombol Hapus Ruang Kerja (jika > 1) */}
+                      {displayWorkspaces.length > 1 && (
+                        <button
+                          type="button"
+                          className="icon-btn"
+                          title={`Hapus "${ws.name}"`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setShowWorkspaceMenu(false);
+                            if (onOpenDeleteWorkspace) onOpenDeleteWorkspace(ws);
+                          }}
+                          style={{
+                            width: 26,
+                            height: 26,
+                            padding: 0,
+                            borderRadius: 6,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            color: 'var(--flow-accent-rose)'
+                          }}
+                        >
+                          <Trash2 size={13} />
+                        </button>
+                      )}
+
+                      {isActive && (
+                        <Check size={15} color="var(--flow-primary)" style={{ marginLeft: 2, flexShrink: 0 }} />
+                      )}
+                    </div>
                   </div>
                 );
               })}
@@ -283,7 +372,14 @@ export const FlowHeader = ({
                   <button
                     className="tab-btn"
                     style={{ width: '100%', justifyContent: 'flex-start', fontSize: '0.82rem', padding: '6px 8px' }}
-                    onClick={() => setIsCreatingWorkspace(true)}
+                    onClick={() => {
+                      if (onOpenEditWorkspace) {
+                        setShowWorkspaceMenu(false);
+                        onOpenEditWorkspace(null);
+                      } else {
+                        setIsCreatingWorkspace(true);
+                      }
+                    }}
                   >
                     <Plus size={14} />
                     <span>+ Tambah Ruang Kerja Baru</span>

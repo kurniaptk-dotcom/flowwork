@@ -320,3 +320,30 @@ export function cloudSubscribeTasks(workspaceId, onPayload) {
   }
 }
 
+/**
+ * Delete all tasks associated with a workspace from Supabase cloud
+ */
+export async function cloudDeleteWorkspaceTasks(workspaceId) {
+  if (!supabase || !workspaceId) return false;
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return false;
+
+    const { error } = await supabase
+      .from('tasks')
+      .delete()
+      .eq('workspace_id', workspaceId)
+      .eq('user_id', user.id);
+
+    if (error) {
+      console.warn('Notice deleting workspace cloud tasks:', error.message || error);
+      return false;
+    }
+    return true;
+  } catch (err) {
+    console.warn('cloudDeleteWorkspaceTasks exception:', err);
+    return false;
+  }
+}
+
+
