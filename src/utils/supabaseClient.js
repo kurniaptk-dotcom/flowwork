@@ -150,3 +150,173 @@ export async function cloudUpdateProfile(updates) {
   if (error) throw error;
   return data;
 }
+
+/**
+ * Fetch user's tasks from Supabase cloud for a specific workspace
+ */
+export async function cloudFetchTasks(workspaceId = 'ws-1') {
+  if (!supabase) return [];
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return [];
+
+    const { data, error } = await supabase
+      .from('tasks')
+      .select('*')
+      .eq('user_id', user.id)
+      .eq('workspace_id', workspaceId)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.warn('Notice fetching cloud tasks:', error.message || error);
+      return [];
+    }
+
+    return (data || []).map((row) => ({
+      id: row.id,
+      projectId: row.workspace_id,
+      title: row.title,
+      description: row.description || '',
+      status: row.status || 'todo',
+      priority: row.priority || 'medium',
+      dueDate: row.due_date || '',
+      tags: Array.isArray(row.tags) ? row.tags : [],
+      assignee: row.assignee || '',
+      subtasks: Array.isArray(row.subtasks) ? row.subtasks : [],
+      createdAt: row.created_at
+    }));
+  } catch (err) {
+    console.warn('cloudFetchTasks exception:', err);
+    return [];
+  }
+}
+
+/**
+ * Upsert a single task to Supabase cloud
+ */
+export async function cloudUpsertTask(task, workspaceId = 'ws-1') {
+  if (!supabase || !task) return null;
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return null;
+
+    const payload = {
+      id: task.id,
+      user_id: user.id,
+      workspace_id: workspaceId || task.projectId || 'ws-1',
+      title: task.title,
+      description: task.description || '',
+      status: task.status || 'todo',
+      priority: task.priority || 'medium',
+      due_date: task.dueDate || null,
+      tags: task.tags || [],
+      assignee: task.assignee || '',
+      subtasks: task.subtasks || [],
+      updated_at: new Date().toISOString()
+    };
+
+    const { data, error } = await supabase
+      .from('tasks')
+      .upsert(payload, { onConflict: 'id' })
+      .select();
+
+    if (error) {
+      console.warn('Notice upserting cloud task:', error.message || error);
+      return null;
+    }
+    return data?.[0] || null;
+  } catch (err) {
+    console.warn('cloudUpsertTask exception:', err);
+    return null;
+  }
+}
+
+/**
+ * Delete a task from Supabase cloud
+ */
+export async function cloudDeleteTask(taskId) {
+  if (!supabase || !taskId) return false;
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return false;
+
+    const { error } = await supabase
+      .from('tasks')
+      .delete()
+      .eq('id', taskId)
+      .eq('user_id', user.id);
+
+    if (error) {
+      console.warn('Notice deleting cloud task:', error.message || error);
+      return false;
+    }
+    return true;
+  } catch (err) {
+    console.warn('cloudDeleteTask exception:', err);
+    return false;
+  }
+}
+
+/**
+ * Batch sync tasks to Supabase cloud (used during initial seed, import, or bulk actions)
+ */
+export async function cloudSyncBatchTasks(tasks = [], workspaceId = 'ws-1') {
+  if (!supabase || !tasks.length) return [];
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return [];
+
+    const payloads = tasks.map((task) => ({
+      id: task.id,
+      user_id: user.id,
+      workspace_id: workspaceId || task.projectId || 'ws-1',
+      title: task.title,
+      description: task.description || '',
+      status: task.status || 'todo',
+      priority: task.priority || 'medium',
+      due_date: task.dueDate || null,
+      tags: task.tags || [],
+      assignee: task.assignee || '',
+      subtasks: task.subtasks || [],
+      updated_at: new Date().toISOString()
+    }));
+
+    const { data, error } = await supabase
+      .from('tasks')
+      .upsert(payloads, { onConflict: 'id' });
+
+    if (error) {
+      console.warn('Notice batch syncing cloud tasks:', error.message || error);
+      return [];
+    }
+    return data || [];
+  } catch (err) {
+    console.warn('cloudSyncBatchTasks exception:', err);
+    return [];
+  }
+}
+
+/**
+ * Subscribe to real-time changes in the tasks table
+ */
+export function cloudSubscribeTasks(workspaceId, onPayload) {
+  if (!supabase) return null;
+  try {
+    const channel = supabase
+      .channel(`realtime:tasks:${workspaceId}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'tasks', filter: `workspace_id=eq.${workspaceId}` },
+        (payload) => {
+          if (typeof onPayload === 'function') onPayload(payload);
+        }
+      )
+      .subscribe();
+
+    return channel;
+  } catch (err) {
+    console.warn('cloudSubscribeTasks exception:', err);
+    return null;
+  }
+}
+

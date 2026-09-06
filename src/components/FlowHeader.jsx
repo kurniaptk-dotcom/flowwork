@@ -20,7 +20,9 @@ import {
   Download,
   HelpCircle,
   Upload,
-  Menu
+  Menu,
+  Cloud,
+  RefreshCw
 } from 'lucide-react';
 
 export const FlowHeader = ({
@@ -51,7 +53,8 @@ export const FlowHeader = ({
   onShowToast,
   currentUser,
   onLogout,
-  onOpenProfile
+  onOpenProfile,
+  cloudSyncStatus = 'synced'
 }) => {
   const [showWorkspaceMenu, setShowWorkspaceMenu] = useState(false);
   const [showNotificationMenu, setShowNotificationMenu] = useState(false);
@@ -365,6 +368,80 @@ export const FlowHeader = ({
 
         {/* Right: Quick Tools */}
         <div className="header-right-tools" style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+          {/* Cloud Sync Status Indicator */}
+          {currentUser?.isCloud ? (
+            <div
+              title={
+                cloudSyncStatus === 'syncing'
+                  ? 'Menyinkronkan tugas ke Supabase Cloud...'
+                  : cloudSyncStatus === 'synced'
+                  ? 'Data tugas terhubung aman ke Supabase PostgreSQL Cloud'
+                  : 'Mode offline (tersimpan di cache lokal)'
+              }
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 5,
+                padding: '3px 9px',
+                borderRadius: 999,
+                fontSize: '0.74rem',
+                fontWeight: 600,
+                background:
+                  cloudSyncStatus === 'syncing'
+                    ? 'rgba(99, 102, 241, 0.12)'
+                    : cloudSyncStatus === 'synced'
+                    ? 'rgba(16, 185, 129, 0.12)'
+                    : 'rgba(245, 158, 11, 0.12)',
+                color:
+                  cloudSyncStatus === 'syncing'
+                    ? '#6366f1'
+                    : cloudSyncStatus === 'synced'
+                    ? '#10b981'
+                    : '#f59e0b',
+                border: `1px solid ${
+                  cloudSyncStatus === 'syncing'
+                    ? 'rgba(99, 102, 241, 0.25)'
+                    : cloudSyncStatus === 'synced'
+                    ? 'rgba(16, 185, 129, 0.25)'
+                    : 'rgba(245, 158, 11, 0.25)'
+                }`,
+                cursor: 'default',
+                userSelect: 'none'
+              }}
+            >
+              {cloudSyncStatus === 'syncing' ? (
+                <RefreshCw size={12} className="spin-sync-icon" />
+              ) : (
+                <Cloud size={12} />
+              )}
+              <span className="btn-label-desktop">
+                {cloudSyncStatus === 'syncing'
+                  ? 'Menyinkronkan...'
+                  : cloudSyncStatus === 'synced'
+                  ? 'Cloud Aktif'
+                  : 'Lokal'}
+              </span>
+            </div>
+          ) : (
+            <div
+              title="Mode Akun Demo / Offline"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 4,
+                padding: '3px 8px',
+                borderRadius: 999,
+                fontSize: '0.72rem',
+                background: 'rgba(100, 116, 139, 0.1)',
+                color: 'var(--flow-text-muted)',
+                fontWeight: 500,
+                border: '1px solid var(--flow-border-subtle)'
+              }}
+            >
+              <span>Mode Lokal</span>
+            </div>
+          )}
+
           {/* New Task Trigger Button */}
           {onOpenNewTask && (
             <button

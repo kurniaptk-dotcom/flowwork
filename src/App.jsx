@@ -43,7 +43,12 @@ import {
   isSupabaseConfigured,
   formatSupabaseUser,
   cloudSignOut,
-  cloudUpdateProfile
+  cloudUpdateProfile,
+  cloudFetchTasks,
+  cloudUpsertTask,
+  cloudDeleteTask,
+  cloudSyncBatchTasks,
+  cloudSubscribeTasks
 } from './utils/supabaseClient';
 import { createActivityLog } from './utils/activityHelper';
 import {
@@ -266,6 +271,7 @@ export function App() {
   const [selectedMemberForDetail, setSelectedMemberForDetail] = useState(null);
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
   const [channelChat, setChannelChat] = useState({ isOpen: false, channelName: '' });
+  const [cloudSyncStatus, setCloudSyncStatus] = useState('synced'); // 'synced' | 'syncing' | 'offline'
 
   // FlowWork Shell modules: 'dashboards' | 'spaces' | 'home' | 'planner' | 'brain' | 'teams'
   const [activeModule, setActiveModule] = useState('dashboards');
@@ -480,6 +486,94 @@ export function App() {
     return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
 
+  // 3. Supabase Cloud Tasks Synchronization & Real-time Subscription
+  useEffect(() => {
+    if (!isSupabaseConfigured || !currentUser?.isCloud) {
+      setCloudSyncStatus('offline');
+      return;
+    }
+
+    let isMounted = true;
+    setCloudSyncStatus('syncing');
+
+    cloudFetchTasks(activeWorkspaceId)
+      .then((cloudTasks) => {
+        if (!isMounted) return;
+        if (cloudTasks && cloudTasks.length > 0) {
+          setTasks(cloudTasks);
+          setCloudSyncStatus('synced');
+        } else {
+          // If cloud has 0 tasks, seed initial tasks from local data to cloud
+          const uPrefix = `u_${currentUser.id}`;
+          const localSaved = localStorage.getItem(`flowwork_${uPrefix}_data_${activeWorkspaceId}`);
+          const parsed = localSaved ? JSON.parse(localSaved)?.tasks : null;
+          const initialTasksToSeed = parsed && parsed.length > 0 ? parsed : tasks;
+          if (initialTasksToSeed && initialTasksToSeed.length > 0) {
+            cloudSyncBatchTasks(initialTasksToSeed, activeWorkspaceId)
+              .then(() => {
+                if (isMounted) setCloudSyncStatus('synced');
+              })
+              .catch(() => {
+                if (isMounted) setCloudSyncStatus('offline');
+              });
+          } else {
+            setCloudSyncStatus('synced');
+          }
+        }
+      })
+      .catch((err) => {
+        console.warn('Notice fetching cloud tasks on mount:', err);
+        if (isMounted) setCloudSyncStatus('offline');
+      });
+
+    // Subscribe to real-time changes in the active workspace
+    const channel = cloudSubscribeTasks(activeWorkspaceId, (payload) => {
+      if (!isMounted) return;
+      if (payload.eventType === 'INSERT' && payload.new) {
+        const newTask = {
+          id: payload.new.id,
+          projectId: payload.new.workspace_id,
+          title: payload.new.title,
+          description: payload.new.description || '',
+          status: payload.new.status || 'todo',
+          priority: payload.new.priority || 'medium',
+          dueDate: payload.new.due_date || '',
+          tags: Array.isArray(payload.new.tags) ? payload.new.tags : [],
+          assignee: payload.new.assignee || '',
+          subtasks: Array.isArray(payload.new.subtasks) ? payload.new.subtasks : []
+        };
+        setTasks((prev) => (prev.some((t) => t.id === newTask.id) ? prev : [newTask, ...prev]));
+      } else if (payload.eventType === 'UPDATE' && payload.new) {
+        setTasks((prev) =>
+          prev.map((t) =>
+            t.id === payload.new.id
+              ? {
+                  ...t,
+                  title: payload.new.title,
+                  description: payload.new.description || '',
+                  status: payload.new.status || 'todo',
+                  priority: payload.new.priority || 'medium',
+                  dueDate: payload.new.due_date || '',
+                  tags: Array.isArray(payload.new.tags) ? payload.new.tags : [],
+                  assignee: payload.new.assignee || '',
+                  subtasks: Array.isArray(payload.new.subtasks) ? payload.new.subtasks : []
+                }
+              : t
+          )
+        );
+      } else if (payload.eventType === 'DELETE' && payload.old) {
+        setTasks((prev) => prev.filter((t) => t.id !== payload.old.id));
+      }
+    });
+
+    return () => {
+      isMounted = false;
+      if (channel && supabase) {
+        supabase.removeChannel(channel);
+      }
+    };
+  }, [activeWorkspaceId, currentUser?.id]);
+
   const handleLoginSuccess = (user, rememberMe = true) => {
     setCurrentUser(user);
     try {
@@ -499,6 +593,25 @@ export function App() {
     setSpaces(userWsData.spaces);
     setNotes(userWsData.notes);
     setChannels(userWsData.channels);
+
+    // If cloud user, trigger cloud fetch & initial seed
+    if (isSupabaseConfigured && user.isCloud) {
+      setCloudSyncStatus('syncing');
+      cloudFetchTasks(activeWorkspaceId)
+        .then((cloudTasks) => {
+          if (cloudTasks && cloudTasks.length > 0) {
+            setTasks(cloudTasks);
+            setCloudSyncStatus('synced');
+          } else if (userWsData.tasks && userWsData.tasks.length > 0) {
+            cloudSyncBatchTasks(userWsData.tasks, activeWorkspaceId)
+              .then(() => setCloudSyncStatus('synced'))
+              .catch(() => setCloudSyncStatus('offline'));
+          } else {
+            setCloudSyncStatus('synced');
+          }
+        })
+        .catch(() => setCloudSyncStatus('offline'));
+    }
 
     // Sync member card if exists
     setMembers((prev) =>
@@ -633,6 +746,25 @@ export function App() {
     setNotes(targetData.notes);
     setChannels(targetData.channels);
 
+    // If cloud session, load cloud tasks for this targeted workspace
+    if (isSupabaseConfigured && currentUser?.isCloud) {
+      setCloudSyncStatus('syncing');
+      cloudFetchTasks(targetWsId)
+        .then((cloudTasks) => {
+          if (cloudTasks && cloudTasks.length > 0) {
+            setTasks(cloudTasks);
+            setCloudSyncStatus('synced');
+          } else if (targetData.tasks && targetData.tasks.length > 0) {
+            cloudSyncBatchTasks(targetData.tasks, targetWsId)
+              .then(() => setCloudSyncStatus('synced'))
+              .catch(() => setCloudSyncStatus('offline'));
+          } else {
+            setCloudSyncStatus('synced');
+          }
+        })
+        .catch(() => setCloudSyncStatus('offline'));
+    }
+
     // 5. Cleanly reset filters and selections
     setActiveSpaceId('all');
     setSelectedTaskIds([]);
@@ -737,6 +869,17 @@ export function App() {
           : t
       )
     );
+
+    if (isSupabaseConfigured && currentUser?.isCloud) {
+      setCloudSyncStatus('syncing');
+      const updatedBatch = tasks
+        .filter((t) => selectedTaskIds.includes(t.id))
+        .map((t) => ({ ...t, status: newStatus }));
+      cloudSyncBatchTasks(updatedBatch, activeWorkspaceId)
+        .then(() => setCloudSyncStatus('synced'))
+        .catch(() => setCloudSyncStatus('offline'));
+    }
+
     addToast(`${count} tugas dipindahkan ke "${colTitle}"`, 'success');
     setSelectedTaskIds([]);
   };
@@ -801,12 +944,23 @@ export function App() {
     const count = deletedTasks.length;
     setTasks((prev) => prev.filter((t) => !selectedTaskIds.includes(t.id)));
     setSelectedTaskIds([]);
+
+    if (isSupabaseConfigured && currentUser?.isCloud) {
+      setCloudSyncStatus('syncing');
+      Promise.all(deletedTasks.map((t) => cloudDeleteTask(t.id)))
+        .then(() => setCloudSyncStatus('synced'))
+        .catch(() => setCloudSyncStatus('offline'));
+    }
+
     addToast(`${count} tugas berhasil dihapus secara massal`, 'info', {
       duration: 6500,
       action: {
         label: 'Urungkan',
         onClick: () => {
           setTasks((prev) => [...deletedTasks, ...prev]);
+          if (isSupabaseConfigured && currentUser?.isCloud) {
+            cloudSyncBatchTasks(deletedTasks, activeWorkspaceId);
+          }
           addToast(`${count} tugas berhasil dipulihkan! ↩️`, 'success');
           if (typeof navigator !== 'undefined' && navigator.vibrate) {
             navigator.vibrate?.([35, 25, 35]);
@@ -1189,18 +1343,37 @@ export function App() {
     if (savedTask.status === 'done') {
       triggerCelebration('task-done');
     }
+
+    // Cloud Task Sync
+    if (isSupabaseConfigured && currentUser?.isCloud) {
+      setCloudSyncStatus('syncing');
+      cloudUpsertTask(savedTask, activeWorkspaceId)
+        .then(() => setCloudSyncStatus('synced'))
+        .catch(() => setCloudSyncStatus('offline'));
+    }
   };
 
   const handleDeleteTask = (taskId) => {
     const target = tasks.find((t) => t.id === taskId);
     if (!target) return;
     setTasks((prev) => prev.filter((t) => t.id !== taskId));
+
+    if (isSupabaseConfigured && currentUser?.isCloud) {
+      setCloudSyncStatus('syncing');
+      cloudDeleteTask(taskId)
+        .then(() => setCloudSyncStatus('synced'))
+        .catch(() => setCloudSyncStatus('offline'));
+    }
+
     addToast(`Tugas "${target.title}" telah dihapus`, 'info', {
       duration: 6500,
       action: {
         label: 'Urungkan',
         onClick: () => {
           setTasks((prev) => [target, ...prev]);
+          if (isSupabaseConfigured && currentUser?.isCloud) {
+            cloudUpsertTask(target, activeWorkspaceId);
+          }
           addToast(`Tugas "${target.title}" berhasil dipulihkan! ↩️`, 'success');
           if (typeof navigator !== 'undefined' && navigator.vibrate) {
             navigator.vibrate?.([30, 20, 30]);
@@ -1227,6 +1400,13 @@ export function App() {
     };
     setTasks((prev) => [...prev, newTask]);
     addToast(`Kartu "${title}" ditambahkan`, 'success');
+
+    if (isSupabaseConfigured && currentUser?.isCloud) {
+      setCloudSyncStatus('syncing');
+      cloudUpsertTask(newTask, activeWorkspaceId)
+        .then(() => setCloudSyncStatus('synced'))
+        .catch(() => setCloudSyncStatus('offline'));
+    }
   };
 
   const handleToggleSubtaskInline = (taskId, subtaskId) => {
@@ -1241,10 +1421,16 @@ export function App() {
           if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(35);
           addToast('Subtask diselesaikan ✓', 'success');
         }
-        return {
+        const updatedTask = {
           ...t,
           subtasks: updatedSubtasks
         };
+
+        if (isSupabaseConfigured && currentUser?.isCloud) {
+          cloudUpsertTask(updatedTask, activeWorkspaceId);
+        }
+
+        return updatedTask;
       })
     );
   };
@@ -1519,6 +1705,7 @@ export function App() {
 
   const handleUpdateTaskStatus = (taskId, newStatus) => {
     const colObj = columns.find((c) => c.id === newStatus);
+    const targetTask = tasks.find((t) => t.id === taskId);
     setTasks((prev) =>
       prev.map((t) =>
         t.id === taskId
@@ -1533,6 +1720,14 @@ export function App() {
           : t
       )
     );
+
+    if (isSupabaseConfigured && currentUser?.isCloud && targetTask) {
+      setCloudSyncStatus('syncing');
+      cloudUpsertTask({ ...targetTask, status: newStatus }, activeWorkspaceId)
+        .then(() => setCloudSyncStatus('synced'))
+        .catch(() => setCloudSyncStatus('offline'));
+    }
+
     addToast(`Status tugas diubah ke "${colObj ? colObj.title : newStatus}"`, 'success');
     if (newStatus === 'done') {
       triggerCelebration('task-done');
@@ -1644,6 +1839,7 @@ export function App() {
             const t = tasks.find((x) => x.id === taskId);
             if (t) handleTaskClick(t);
           }}
+          cloudSyncStatus={cloudSyncStatus}
         />
 
         {/* Dynamic Module Content */}
