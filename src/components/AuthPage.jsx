@@ -19,6 +19,14 @@ import {
   Check
 } from 'lucide-react';
 import { hashPassword, validateEmail, checkPasswordStrength } from '../utils/securityHelper';
+import {
+  isSupabaseConfigured,
+  cloudSignUp,
+  cloudSignIn,
+  cloudSignInWithGoogle,
+  cloudResetPassword,
+  formatSupabaseUser
+} from '../utils/supabaseClient';
 import '../styles/auth-page.css';
 
 export const AuthPage = ({ onLoginSuccess }) => {
@@ -70,15 +78,61 @@ export const AuthPage = ({ onLoginSuccess }) => {
     setLoading(true);
 
     try {
+      // 1. Official Default Demo Account (Instant 1-Click for offline evaluation)
+      if (
+        loginEmail.trim().toLowerCase() === 'kurnia@flowwork.id' &&
+        loginPassword === 'kurnia123'
+      ) {
+        const userSession = {
+          id: 'kurnia',
+          name: 'Kurnia Pratama',
+          email: 'kurnia@flowwork.id',
+          role: 'Workspace Owner & Lead',
+          category: 'Mahasiswa / Pelajar',
+          avatar: 'K',
+          avatarColor: '#00a884',
+          token: 'auth_demo_' + Date.now(),
+          loginAt: new Date().toISOString()
+        };
+        onLoginSuccess(userSession, rememberMe);
+        return;
+      }
+
+      // 2. Try Supabase Cloud Login first if configured
+      if (isSupabaseConfigured) {
+        try {
+          const cloudData = await cloudSignIn(loginEmail, loginPassword);
+          if (cloudData?.user) {
+            const userSession = formatSupabaseUser(cloudData.user, cloudData.session);
+            onLoginSuccess(userSession, rememberMe);
+            return;
+          }
+        } catch (cloudErr) {
+          console.log('Supabase sign-in note:', cloudErr.message);
+          // If message is specifically wrong credentials and not network error, show it
+          if (cloudErr.message && !cloudErr.message.includes('FetchError') && !cloudErr.message.includes('NetworkError')) {
+            // Check if account exists locally before blocking
+            const savedAccounts = JSON.parse(localStorage.getItem('flowwork_registered_accounts') || '[]');
+            const localMatched = savedAccounts.find(
+              (acc) => acc.email.toLowerCase() === loginEmail.trim().toLowerCase()
+            );
+            if (!localMatched) {
+              setErrorMessage('Email atau password salah. Pastikan akun sudah terdaftar di Supabase.');
+              setLoading(false);
+              return;
+            }
+          }
+        }
+      }
+
+      // 3. Fallback to Local Encrypted Accounts (Offline-first capability)
       const inputHash = await hashPassword(loginPassword);
       const savedAccounts = JSON.parse(localStorage.getItem('flowwork_registered_accounts') || '[]');
-      
       const matched = savedAccounts.find(
         (acc) => acc.email.toLowerCase() === loginEmail.trim().toLowerCase()
       );
 
       if (matched) {
-        // Support both hashed (new) and legacy plaintext (auto-upgrade)
         const isPasswordCorrect =
           matched.passwordHash === inputHash ||
           matched.password === loginPassword;
@@ -87,13 +141,6 @@ export const AuthPage = ({ onLoginSuccess }) => {
           setErrorMessage('Password yang Anda masukkan salah.');
           setLoading(false);
           return;
-        }
-
-        // Auto-upgrade legacy account to hashed if needed
-        if (!matched.passwordHash && matched.password) {
-          matched.passwordHash = inputHash;
-          delete matched.password;
-          localStorage.setItem('flowwork_registered_accounts', JSON.stringify(savedAccounts));
         }
 
         const userSession = {
@@ -109,28 +156,12 @@ export const AuthPage = ({ onLoginSuccess }) => {
         };
 
         onLoginSuccess(userSession, rememberMe);
-      } else if (
-        loginEmail.trim().toLowerCase() === 'kurnia@flowwork.id' &&
-        loginPassword === 'kurnia123'
-      ) {
-        // Official Default Demo Account
-        const userSession = {
-          id: 'kurnia',
-          name: 'Kurnia Pratama',
-          email: 'kurnia@flowwork.id',
-          role: 'Workspace Owner & Lead',
-          category: 'Mahasiswa / Pelajar',
-          avatar: 'K',
-          avatarColor: '#00a884',
-          token: 'auth_demo_' + Date.now(),
-          loginAt: new Date().toISOString()
-        };
-        onLoginSuccess(userSession, rememberMe);
-      } else {
-        setErrorMessage('Email tidak terdaftar atau password salah. Silakan periksa kembali atau buat akun baru.');
+        return;
       }
+
+      setErrorMessage('Email tidak terdaftar atau password salah. Silakan periksa kembali atau buat akun baru.');
     } catch (err) {
-      setErrorMessage('Terjadi kesalahan saat memproses login.');
+      setErrorMessage(err.message || 'Terjadi kesalahan saat memproses login.');
     } finally {
       setLoading(false);
     }
@@ -163,53 +194,76 @@ export const AuthPage = ({ onLoginSuccess }) => {
     setLoading(true);
 
     try {
+      const avatarColors = ['#6366f1', '#06b6d4', '#10b981', '#f59e0b', '#ec4899', '#8b5cf6'];
+      const randomColor = avatarColors[Math.floor(Math.random() * avatarColors.length)];
+      const passwordHash = await hashPassword(regPassword);
+
+      let createdUserSession = null;
+
+      // 1. Try Supabase Cloud Registration
+      if (isSupabaseConfigured) {
+        try {
+          const cloudData = await cloudSignUp(regEmail, regPassword, {
+            name: regName.trim(),
+            category: regCategory,
+            avatar: regName.trim().slice(0, 2).toUpperCase(),
+            avatarColor: randomColor
+          });
+
+          if (cloudData?.user) {
+            createdUserSession = formatSupabaseUser(cloudData.user, cloudData.session);
+          }
+        } catch (cloudErr) {
+          console.warn('Supabase cloud signup notice:', cloudErr);
+          if (cloudErr.message?.toLowerCase().includes('already registered')) {
+            setErrorMessage('Alamat email sudah terdaftar di Supabase. Silakan langsung masuk.');
+            setLoading(false);
+            return;
+          }
+        }
+      }
+
+      // 2. Persist locally so user can always work offline
       const savedAccounts = JSON.parse(localStorage.getItem('flowwork_registered_accounts') || '[]');
-      const existing = savedAccounts.find(
+      const existingIdx = savedAccounts.findIndex(
         (acc) => acc.email.toLowerCase() === regEmail.trim().toLowerCase()
       );
 
-      if (existing || regEmail.trim().toLowerCase() === 'kurnia@flowwork.id') {
-        setErrorMessage('Alamat email sudah terdaftar. Silakan langsung masuk.');
-        setLoading(false);
-        return;
-      }
-
-      // Compute secure SHA-256 Hash
-      const passwordHash = await hashPassword(regPassword);
-
-      const avatarColors = ['#6366f1', '#06b6d4', '#10b981', '#f59e0b', '#ec4899', '#8b5cf6'];
-      const randomColor = avatarColors[Math.floor(Math.random() * avatarColors.length)];
-
-      const newAccount = {
-        id: 'acc-' + Date.now(),
+      const localAccount = {
+        id: createdUserSession?.id || 'acc-' + Date.now(),
         name: regName.trim(),
         email: regEmail.trim().toLowerCase(),
-        passwordHash: passwordHash, // Encrypted hash stored, NO plain text!
+        passwordHash: passwordHash,
         category: regCategory,
         role: regCategory,
         avatar: regName.trim().slice(0, 2).toUpperCase(),
         avatarColor: randomColor,
+        isCloud: Boolean(createdUserSession),
         createdAt: new Date().toISOString()
       };
 
-      savedAccounts.push(newAccount);
+      if (existingIdx !== -1) {
+        savedAccounts[existingIdx] = localAccount;
+      } else {
+        savedAccounts.push(localAccount);
+      }
       localStorage.setItem('flowwork_registered_accounts', JSON.stringify(savedAccounts));
 
-      const userSession = {
-        id: newAccount.id,
-        name: newAccount.name,
-        email: newAccount.email,
-        role: newAccount.category,
-        category: newAccount.category,
-        avatar: newAccount.avatar,
-        avatarColor: newAccount.avatarColor,
+      const userSession = createdUserSession || {
+        id: localAccount.id,
+        name: localAccount.name,
+        email: localAccount.email,
+        role: localAccount.category,
+        category: localAccount.category,
+        avatar: localAccount.avatar,
+        avatarColor: localAccount.avatarColor,
         token: 'auth_' + Date.now(),
         loginAt: new Date().toISOString()
       };
 
       onLoginSuccess(userSession, true);
     } catch (err) {
-      setErrorMessage('Gagal menyimpan akun baru. Silakan coba lagi.');
+      setErrorMessage(err.message || 'Gagal menyimpan akun baru. Silakan coba lagi.');
     } finally {
       setLoading(false);
     }
@@ -231,7 +285,20 @@ export const AuthPage = ({ onLoginSuccess }) => {
     onLoginSuccess(guestUser, false);
   };
 
-  const handleGoogleLogin = () => {
+  const handleGoogleLogin = async () => {
+    if (isSupabaseConfigured) {
+      try {
+        setLoading(true);
+        await cloudSignInWithGoogle();
+        return;
+      } catch (err) {
+        console.warn('Google cloud OAuth error, using local fallback:', err);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    // Local Simulation Fallback
     setLoading(true);
     setTimeout(() => {
       const googleUser = {
@@ -277,6 +344,25 @@ export const AuthPage = ({ onLoginSuccess }) => {
     setResetLoading(true);
 
     try {
+      // 1. If Supabase configured, request password reset email
+      if (isSupabaseConfigured) {
+        try {
+          await cloudResetPassword(resetEmail);
+          setResetMessage({
+            type: 'success',
+            text: 'Tautan pemulihan kata sandi telah dikirimkan ke email Anda! Silakan periksa kotak masuk email Anda.'
+          });
+          setTimeout(() => {
+            setShowResetModal(false);
+            setResetMessage({ type: '', text: '' });
+          }, 3000);
+          return;
+        } catch (cloudErr) {
+          console.warn('Supabase reset password note:', cloudErr);
+        }
+      }
+
+      // 2. Local fallback reset
       const savedAccounts = JSON.parse(localStorage.getItem('flowwork_registered_accounts') || '[]');
       const accountIndex = savedAccounts.findIndex(
         (acc) => acc.email.toLowerCase() === resetEmail.trim().toLowerCase()
@@ -330,7 +416,27 @@ export const AuthPage = ({ onLoginSuccess }) => {
             <div className="flow-auth-logo-icon">F</div>
             <div>
               <div className="flow-auth-brand-name">FlowWork</div>
-              <div className="flow-auth-brand-badge">B2C Productivity OS</div>
+              <div style={{ display: 'flex', gap: 6, alignItems: 'center', marginTop: 3 }}>
+                <div className="flow-auth-brand-badge">B2C Productivity OS</div>
+                {isSupabaseConfigured && (
+                  <div
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: 4,
+                      fontSize: '0.68rem',
+                      color: 'var(--flow-accent-emerald)',
+                      background: 'rgba(16, 185, 129, 0.12)',
+                      padding: '2px 7px',
+                      borderRadius: 999,
+                      fontWeight: 700
+                    }}
+                  >
+                    <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--flow-accent-emerald)' }} />
+                    Supabase Cloud
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 

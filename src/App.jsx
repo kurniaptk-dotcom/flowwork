@@ -38,6 +38,13 @@ import { ShortcutsModal } from './components/ShortcutsModal';
 import { ConfirmModal } from './components/ConfirmModal';
 import { AuthPage } from './components/AuthPage';
 import { ProfileModal } from './components/ProfileModal';
+import {
+  supabase,
+  isSupabaseConfigured,
+  formatSupabaseUser,
+  cloudSignOut,
+  cloudUpdateProfile
+} from './utils/supabaseClient';
 import { createActivityLog } from './utils/activityHelper';
 import {
   KanbanSquare,
@@ -430,8 +437,32 @@ export function App() {
     setToasts((prev) => prev.filter((t) => t.id !== id));
   };
 
-  // Multi-Tab Session Synchronization
+  // Multi-Tab Session Synchronization & Supabase Real-Time Listener
   useEffect(() => {
+    // 1. Supabase Session Detection
+    if (isSupabaseConfigured && supabase) {
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        if (session?.user && !currentUser) {
+          const u = formatSupabaseUser(session.user, session);
+          handleLoginSuccess(u, true);
+        }
+      });
+
+      const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+        if (event === 'SIGNED_IN' && session?.user) {
+          const u = formatSupabaseUser(session.user, session);
+          setCurrentUser(u);
+        } else if (event === 'SIGNED_OUT') {
+          setCurrentUser(null);
+        }
+      });
+
+      return () => {
+        authListener?.subscription?.unsubscribe();
+      };
+    }
+
+    // 2. Local storage cross-tab sync
     const handleStorageChange = (e) => {
       if (e.key === 'flowwork_auth_user') {
         if (!e.newValue) {
@@ -487,11 +518,14 @@ export function App() {
     addToast(`Selamat datang di FlowWork, ${user.name}! 👋`, 'success');
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     setCurrentUser(null);
     try {
       localStorage.removeItem('flowwork_auth_user');
       sessionStorage.removeItem('flowwork_auth_user');
+      if (isSupabaseConfigured) {
+        await cloudSignOut();
+      }
     } catch {}
     addToast('Anda telah keluar dari akun.', 'info');
   };
@@ -504,6 +538,17 @@ export function App() {
       }
       if (sessionStorage.getItem('flowwork_auth_user')) {
         sessionStorage.setItem('flowwork_auth_user', JSON.stringify(updatedUser));
+      }
+
+      // Sync to Supabase cloud if connected
+      if (isSupabaseConfigured) {
+        cloudUpdateProfile({
+          name: updatedUser.name,
+          role: updatedUser.role,
+          category: updatedUser.category,
+          avatar: updatedUser.avatar,
+          avatarColor: updatedUser.avatarColor
+        }).catch((err) => console.warn('Cloud profile sync notice:', err));
       }
 
       // Sync registered accounts list
