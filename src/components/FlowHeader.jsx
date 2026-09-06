@@ -50,7 +50,8 @@ export const FlowHeader = ({
   onOpenShortcuts,
   onShowToast,
   currentUser,
-  onLogout
+  onLogout,
+  onOpenProfile
 }) => {
   const [showWorkspaceMenu, setShowWorkspaceMenu] = useState(false);
   const [showNotificationMenu, setShowNotificationMenu] = useState(false);
@@ -574,7 +575,7 @@ export const FlowHeader = ({
                 width: 30,
                 height: 30,
                 borderRadius: '50%',
-                backgroundColor: 'var(--flow-primary)',
+                backgroundColor: currentUser?.avatarColor || 'var(--flow-primary)',
                 color: '#fff',
                 fontWeight: 700,
                 fontSize: '0.82rem',
@@ -616,6 +617,17 @@ export const FlowHeader = ({
                   <div style={{ fontSize: '0.72rem', color: 'var(--flow-text-muted)' }}>
                     {currentUser?.email || 'kurnia@flowwork.id'} • {currentUser?.role || 'Akun Personal'}
                   </div>
+                </div>
+
+                <div
+                  className="flow-nav-item"
+                  onClick={() => {
+                    setShowProfileMenu(false);
+                    if (onOpenProfile) onOpenProfile();
+                  }}
+                >
+                  <User size={14} />
+                  <span>Pengaturan Profil</span>
                 </div>
 
                 <div

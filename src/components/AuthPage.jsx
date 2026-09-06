@@ -13,13 +13,18 @@ import {
   GraduationCap,
   Briefcase,
   Layers,
-  AlertCircle
+  AlertCircle,
+  X,
+  KeyRound,
+  Check
 } from 'lucide-react';
+import { hashPassword, validateEmail, checkPasswordStrength } from '../utils/securityHelper';
 import '../styles/auth-page.css';
 
 export const AuthPage = ({ onLoginSuccess }) => {
   const [activeTab, setActiveTab] = useState('login'); // 'login' | 'register'
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -32,78 +37,116 @@ export const AuthPage = ({ onLoginSuccess }) => {
   const [regName, setRegName] = useState('');
   const [regEmail, setRegEmail] = useState('');
   const [regPassword, setRegPassword] = useState('');
+  const [regConfirmPassword, setRegConfirmPassword] = useState('');
   const [regCategory, setRegCategory] = useState('Mahasiswa / Pelajar');
 
-  const handleLogin = (e) => {
+  // Reset Password Modal States
+  const [showResetModal, setShowResetModal] = useState(false);
+  const [resetEmail, setResetEmail] = useState('');
+  const [resetNewPassword, setResetNewPassword] = useState('');
+  const [resetConfirmPassword, setResetConfirmPassword] = useState('');
+  const [resetMessage, setResetMessage] = useState({ type: '', text: '' });
+  const [resetLoading, setResetLoading] = useState(false);
+
+  // Password strength calculation
+  const pwdStrength = checkPasswordStrength(regPassword);
+  const isConfirmMatched = regConfirmPassword.length > 0 && regPassword === regConfirmPassword;
+  const isConfirmMismatched = regConfirmPassword.length > 0 && regPassword !== regConfirmPassword;
+
+  const handleLogin = async (e) => {
     e?.preventDefault();
     setErrorMessage('');
+
     if (!loginEmail.trim() || !loginPassword.trim()) {
       setErrorMessage('Silakan isi email dan password Anda.');
       return;
     }
 
+    if (!validateEmail(loginEmail)) {
+      setErrorMessage('Format alamat email tidak valid.');
+      return;
+    }
+
     setLoading(true);
 
-    setTimeout(() => {
-      // Check registered accounts or match default Kurnia
-      try {
-        const savedAccounts = JSON.parse(localStorage.getItem('flowwork_registered_accounts') || '[]');
-        const matched = savedAccounts.find(
-          (acc) => acc.email.toLowerCase() === loginEmail.trim().toLowerCase()
-        );
+    try {
+      const inputHash = await hashPassword(loginPassword);
+      const savedAccounts = JSON.parse(localStorage.getItem('flowwork_registered_accounts') || '[]');
+      
+      const matched = savedAccounts.find(
+        (acc) => acc.email.toLowerCase() === loginEmail.trim().toLowerCase()
+      );
 
-        if (matched) {
-          if (matched.password !== loginPassword) {
-            setErrorMessage('Password yang Anda masukkan salah.');
-            setLoading(false);
-            return;
-          }
-          const userSession = {
-            id: matched.id,
-            name: matched.name,
-            email: matched.email,
-            role: matched.role || matched.category,
-            category: matched.category,
-            avatar: matched.name.slice(0, 2).toUpperCase(),
-            token: 'auth_' + Date.now(),
-            loginAt: new Date().toISOString()
-          };
-          onLoginSuccess(userSession);
-        } else if (
-          loginEmail.trim().toLowerCase() === 'kurnia@flowwork.id' ||
-          loginEmail.trim().toLowerCase() === 'kurnia' ||
-          loginEmail.includes('@')
-        ) {
-          // Default Kurnia or Any valid email in local offline mode
-          const userName = loginEmail.split('@')[0];
-          const capitalized = userName.charAt(0).toUpperCase() + userName.slice(1);
-          const userSession = {
-            id: 'user-' + Date.now(),
-            name: loginEmail.toLowerCase().includes('kurnia') ? 'Kurnia' : capitalized,
-            email: loginEmail.trim(),
-            role: 'Pemilik Ruang Kerja',
-            category: 'Mahasiswa / Pelajar',
-            avatar: loginEmail.toLowerCase().includes('kurnia') ? 'K' : capitalized.charAt(0),
-            token: 'auth_' + Date.now(),
-            loginAt: new Date().toISOString()
-          };
-          onLoginSuccess(userSession);
-        } else {
-          setErrorMessage('Format email tidak valid.');
+      if (matched) {
+        // Support both hashed (new) and legacy plaintext (auto-upgrade)
+        const isPasswordCorrect =
+          matched.passwordHash === inputHash ||
+          matched.password === loginPassword;
+
+        if (!isPasswordCorrect) {
+          setErrorMessage('Password yang Anda masukkan salah.');
+          setLoading(false);
+          return;
         }
-      } catch (err) {
-        setErrorMessage('Terjadi kesalahan saat memproses login.');
+
+        // Auto-upgrade legacy account to hashed if needed
+        if (!matched.passwordHash && matched.password) {
+          matched.passwordHash = inputHash;
+          delete matched.password;
+          localStorage.setItem('flowwork_registered_accounts', JSON.stringify(savedAccounts));
+        }
+
+        const userSession = {
+          id: matched.id,
+          name: matched.name,
+          email: matched.email,
+          role: matched.role || matched.category,
+          category: matched.category,
+          avatar: matched.avatar || matched.name.slice(0, 2).toUpperCase(),
+          avatarColor: matched.avatarColor || '#6366f1',
+          token: 'auth_' + Date.now(),
+          loginAt: new Date().toISOString()
+        };
+
+        onLoginSuccess(userSession, rememberMe);
+      } else if (
+        loginEmail.trim().toLowerCase() === 'kurnia@flowwork.id' &&
+        loginPassword === 'kurnia123'
+      ) {
+        // Official Default Demo Account
+        const userSession = {
+          id: 'kurnia',
+          name: 'Kurnia Pratama',
+          email: 'kurnia@flowwork.id',
+          role: 'Workspace Owner & Lead',
+          category: 'Mahasiswa / Pelajar',
+          avatar: 'K',
+          avatarColor: '#00a884',
+          token: 'auth_demo_' + Date.now(),
+          loginAt: new Date().toISOString()
+        };
+        onLoginSuccess(userSession, rememberMe);
+      } else {
+        setErrorMessage('Email tidak terdaftar atau password salah. Silakan periksa kembali atau buat akun baru.');
       }
+    } catch (err) {
+      setErrorMessage('Terjadi kesalahan saat memproses login.');
+    } finally {
       setLoading(false);
-    }, 350);
+    }
   };
 
-  const handleRegister = (e) => {
+  const handleRegister = async (e) => {
     e?.preventDefault();
     setErrorMessage('');
 
-    if (!regName.trim() || !regEmail.trim() || !regPassword.trim()) {
+    if (!regName.trim() || !regEmail.trim() || !regPassword.trim() || !regConfirmPassword.trim()) {
       setErrorMessage('Lengkapi semua kolom formulir pendaftaran.');
+      return;
+    }
+
+    if (!validateEmail(regEmail)) {
+      setErrorMessage('Format email tidak valid (contoh: nama@kampus.ac.id).');
       return;
     }
 
@@ -112,51 +155,64 @@ export const AuthPage = ({ onLoginSuccess }) => {
       return;
     }
 
+    if (regPassword !== regConfirmPassword) {
+      setErrorMessage('Konfirmasi password tidak cocok dengan password yang dibuat.');
+      return;
+    }
+
     setLoading(true);
 
-    setTimeout(() => {
-      try {
-        const savedAccounts = JSON.parse(localStorage.getItem('flowwork_registered_accounts') || '[]');
-        const existing = savedAccounts.find(
-          (acc) => acc.email.toLowerCase() === regEmail.trim().toLowerCase()
-        );
+    try {
+      const savedAccounts = JSON.parse(localStorage.getItem('flowwork_registered_accounts') || '[]');
+      const existing = savedAccounts.find(
+        (acc) => acc.email.toLowerCase() === regEmail.trim().toLowerCase()
+      );
 
-        if (existing) {
-          setErrorMessage('Email sudah terdaftar. Silakan langsung masuk.');
-          setLoading(false);
-          return;
-        }
-
-        const newAccount = {
-          id: 'acc-' + Date.now(),
-          name: regName.trim(),
-          email: regEmail.trim(),
-          password: regPassword,
-          category: regCategory,
-          role: regCategory,
-          createdAt: new Date().toISOString()
-        };
-
-        savedAccounts.push(newAccount);
-        localStorage.setItem('flowwork_registered_accounts', JSON.stringify(savedAccounts));
-
-        const userSession = {
-          id: newAccount.id,
-          name: newAccount.name,
-          email: newAccount.email,
-          role: newAccount.category,
-          category: newAccount.category,
-          avatar: newAccount.name.slice(0, 2).toUpperCase(),
-          token: 'auth_' + Date.now(),
-          loginAt: new Date().toISOString()
-        };
-
-        onLoginSuccess(userSession);
-      } catch (err) {
-        setErrorMessage('Gagal menyimpan akun baru. Silakan coba lagi.');
+      if (existing || regEmail.trim().toLowerCase() === 'kurnia@flowwork.id') {
+        setErrorMessage('Alamat email sudah terdaftar. Silakan langsung masuk.');
+        setLoading(false);
+        return;
       }
+
+      // Compute secure SHA-256 Hash
+      const passwordHash = await hashPassword(regPassword);
+
+      const avatarColors = ['#6366f1', '#06b6d4', '#10b981', '#f59e0b', '#ec4899', '#8b5cf6'];
+      const randomColor = avatarColors[Math.floor(Math.random() * avatarColors.length)];
+
+      const newAccount = {
+        id: 'acc-' + Date.now(),
+        name: regName.trim(),
+        email: regEmail.trim().toLowerCase(),
+        passwordHash: passwordHash, // Encrypted hash stored, NO plain text!
+        category: regCategory,
+        role: regCategory,
+        avatar: regName.trim().slice(0, 2).toUpperCase(),
+        avatarColor: randomColor,
+        createdAt: new Date().toISOString()
+      };
+
+      savedAccounts.push(newAccount);
+      localStorage.setItem('flowwork_registered_accounts', JSON.stringify(savedAccounts));
+
+      const userSession = {
+        id: newAccount.id,
+        name: newAccount.name,
+        email: newAccount.email,
+        role: newAccount.category,
+        category: newAccount.category,
+        avatar: newAccount.avatar,
+        avatarColor: newAccount.avatarColor,
+        token: 'auth_' + Date.now(),
+        loginAt: new Date().toISOString()
+      };
+
+      onLoginSuccess(userSession, true);
+    } catch (err) {
+      setErrorMessage('Gagal menyimpan akun baru. Silakan coba lagi.');
+    } finally {
       setLoading(false);
-    }, 400);
+    }
   };
 
   const handleGuestLogin = () => {
@@ -167,11 +223,12 @@ export const AuthPage = ({ onLoginSuccess }) => {
       role: 'Tamu Eksplorasi',
       category: 'Mahasiswa / Pelajar',
       avatar: 'T',
+      avatarColor: '#06b6d4',
       token: 'guest_' + Date.now(),
       isGuest: true,
       loginAt: new Date().toISOString()
     };
-    onLoginSuccess(guestUser);
+    onLoginSuccess(guestUser, false);
   };
 
   const handleGoogleLogin = () => {
@@ -184,12 +241,80 @@ export const AuthPage = ({ onLoginSuccess }) => {
         role: 'Mahasiswa & Freelancer',
         category: 'Mahasiswa / Pelajar',
         avatar: 'G',
+        avatarColor: '#ea4335',
         token: 'google_token_' + Date.now(),
         loginAt: new Date().toISOString()
       };
       setLoading(false);
-      onLoginSuccess(googleUser);
+      onLoginSuccess(googleUser, true);
     }, 450);
+  };
+
+  const handleResetPasswordSubmit = async (e) => {
+    e.preventDefault();
+    setResetMessage({ type: '', text: '' });
+
+    if (!resetEmail.trim() || !resetNewPassword.trim()) {
+      setResetMessage({ type: 'error', text: 'Semua kolom wajib diisi.' });
+      return;
+    }
+
+    if (!validateEmail(resetEmail)) {
+      setResetMessage({ type: 'error', text: 'Format email tidak valid.' });
+      return;
+    }
+
+    if (resetNewPassword.length < 6) {
+      setResetMessage({ type: 'error', text: 'Password baru minimal 6 karakter.' });
+      return;
+    }
+
+    if (resetNewPassword !== resetConfirmPassword) {
+      setResetMessage({ type: 'error', text: 'Konfirmasi password baru tidak cocok.' });
+      return;
+    }
+
+    setResetLoading(true);
+
+    try {
+      const savedAccounts = JSON.parse(localStorage.getItem('flowwork_registered_accounts') || '[]');
+      const accountIndex = savedAccounts.findIndex(
+        (acc) => acc.email.toLowerCase() === resetEmail.trim().toLowerCase()
+      );
+
+      if (accountIndex === -1 && resetEmail.trim().toLowerCase() !== 'kurnia@flowwork.id') {
+        setResetMessage({
+          type: 'error',
+          text: 'Akun dengan email ini belum terdaftar di perangkat ini.'
+        });
+        setResetLoading(false);
+        return;
+      }
+
+      const newHash = await hashPassword(resetNewPassword);
+
+      if (accountIndex !== -1) {
+        savedAccounts[accountIndex].passwordHash = newHash;
+        delete savedAccounts[accountIndex].password;
+        localStorage.setItem('flowwork_registered_accounts', JSON.stringify(savedAccounts));
+      }
+
+      setResetMessage({
+        type: 'success',
+        text: 'Password berhasil diperbarui! Silakan masuk dengan kata sandi baru Anda.'
+      });
+
+      setTimeout(() => {
+        setShowResetModal(false);
+        setLoginEmail(resetEmail.trim());
+        setLoginPassword('');
+        setResetMessage({ type: '', text: '' });
+      }, 1500);
+    } catch (err) {
+      setResetMessage({ type: 'error', text: 'Gagal mengatur ulang password.' });
+    } finally {
+      setResetLoading(false);
+    }
   };
 
   return (
@@ -338,7 +463,10 @@ export const AuthPage = ({ onLoginSuccess }) => {
                   </label>
                   <span
                     style={{ fontSize: '0.72rem', color: 'var(--flow-primary)', cursor: 'pointer', fontWeight: 600 }}
-                    onClick={() => alert('Password default untuk demo: kurnia123')}
+                    onClick={() => {
+                      setResetEmail(loginEmail);
+                      setShowResetModal(true);
+                    }}
                   >
                     Lupa Password?
                   </span>
@@ -476,6 +604,7 @@ export const AuthPage = ({ onLoginSuccess }) => {
                 </div>
               </div>
 
+              {/* Create Password */}
               <div className="flow-auth-field">
                 <label className="flow-auth-label">
                   <Lock size={13} />
@@ -499,6 +628,68 @@ export const AuthPage = ({ onLoginSuccess }) => {
                     {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                   </button>
                 </div>
+
+                {/* Password Strength Meter */}
+                {regPassword.length > 0 && (
+                  <div className="flow-auth-strength-wrap">
+                    <div className="flow-auth-strength-bars">
+                      <div
+                        className="flow-auth-strength-bar"
+                        style={{ background: pwdStrength.score >= 1 ? pwdStrength.color : undefined }}
+                      />
+                      <div
+                        className="flow-auth-strength-bar"
+                        style={{ background: pwdStrength.score >= 2 ? pwdStrength.color : undefined }}
+                      />
+                      <div
+                        className="flow-auth-strength-bar"
+                        style={{ background: pwdStrength.score >= 3 ? pwdStrength.color : undefined }}
+                      />
+                    </div>
+                    <div className="flow-auth-strength-meta">
+                      <span>{pwdStrength.feedback}</span>
+                      <span className="flow-auth-strength-label" style={{ color: pwdStrength.color }}>
+                        {pwdStrength.label}
+                      </span>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Confirm Password */}
+              <div className="flow-auth-field">
+                <label className="flow-auth-label">
+                  <KeyRound size={13} />
+                  Konfirmasi Password
+                </label>
+                <div className="flow-auth-input-wrap">
+                  <Lock size={16} className="flow-auth-input-icon" />
+                  <input
+                    type={showConfirmPassword ? 'text' : 'password'}
+                    className="flow-auth-input"
+                    placeholder="Ulangi password di atas"
+                    value={regConfirmPassword}
+                    onChange={(e) => setRegConfirmPassword(e.target.value)}
+                    required
+                  />
+                  <button
+                    type="button"
+                    className="flow-auth-input-btn"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  >
+                    {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                </div>
+                {isConfirmMatched && (
+                  <div className="flow-auth-match-badge" style={{ color: 'var(--flow-accent-emerald)' }}>
+                    <Check size={12} /> Password cocok
+                  </div>
+                )}
+                {isConfirmMismatched && (
+                  <div className="flow-auth-match-badge" style={{ color: 'var(--flow-accent-rose)' }}>
+                    <AlertCircle size={12} /> Password belum cocok
+                  </div>
+                )}
               </div>
 
               <div className="flow-auth-field">
@@ -529,12 +720,118 @@ export const AuthPage = ({ onLoginSuccess }) => {
 
               <div style={{ textAlign: 'center', marginTop: 14, fontSize: '0.72rem', color: 'var(--flow-text-muted)', lineHeight: 1.4 }}>
                 <ShieldCheck size={13} style={{ display: 'inline', verticalAlign: 'middle', marginRight: 4, color: 'var(--flow-accent-emerald)' }} />
-                Data Anda terenkripsi aman secara lokal di browser Anda.
+                Password dienkripsi SHA-256 dan tersimpan aman di browser Anda.
               </div>
             </form>
           )}
         </div>
       </div>
+
+      {/* Reset Password Modal */}
+      {showResetModal && (
+        <div className="flow-auth-modal-backdrop" onClick={() => setShowResetModal(false)}>
+          <div className="flow-auth-modal-card" onClick={(e) => e.stopPropagation()}>
+            <div className="flow-auth-modal-header">
+              <div>
+                <div className="flow-auth-modal-title">Atur Ulang Password</div>
+                <div className="flow-auth-modal-subtitle">
+                  Masukkan email terdaftar dan buat kata sandi baru untuk akun Anda.
+                </div>
+              </div>
+              <button
+                type="button"
+                className="flow-auth-modal-close"
+                onClick={() => setShowResetModal(false)}
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {resetMessage.text && (
+              <div
+                className="flow-auth-error-alert"
+                style={{
+                  background:
+                    resetMessage.type === 'success'
+                      ? 'rgba(16, 185, 129, 0.12)'
+                      : 'rgba(244, 63, 94, 0.12)',
+                  borderColor:
+                    resetMessage.type === 'success'
+                      ? 'rgba(16, 185, 129, 0.3)'
+                      : 'rgba(244, 63, 94, 0.3)',
+                  color:
+                    resetMessage.type === 'success'
+                      ? 'var(--flow-accent-emerald)'
+                      : 'var(--flow-accent-rose)'
+                }}
+              >
+                {resetMessage.type === 'success' ? <CheckCircle2 size={16} /> : <AlertCircle size={16} />}
+                <span>{resetMessage.text}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleResetPasswordSubmit}>
+              <div className="flow-auth-field">
+                <label className="flow-auth-label">Alamat Email Terdaftar</label>
+                <input
+                  type="email"
+                  className="flow-auth-input"
+                  style={{ paddingLeft: 14 }}
+                  placeholder="email@kampus.ac.id"
+                  value={resetEmail}
+                  onChange={(e) => setResetEmail(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div className="flow-auth-field">
+                <label className="flow-auth-label">Password Baru</label>
+                <input
+                  type="password"
+                  className="flow-auth-input"
+                  style={{ paddingLeft: 14 }}
+                  placeholder="Minimal 6 karakter"
+                  value={resetNewPassword}
+                  onChange={(e) => setResetNewPassword(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div className="flow-auth-field">
+                <label className="flow-auth-label">Ulangi Password Baru</label>
+                <input
+                  type="password"
+                  className="flow-auth-input"
+                  style={{ paddingLeft: 14 }}
+                  placeholder="Konfirmasi password baru"
+                  value={resetConfirmPassword}
+                  onChange={(e) => setResetConfirmPassword(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div style={{ display: 'flex', gap: 10, marginTop: 20 }}>
+                <button
+                  type="button"
+                  className="tab-btn"
+                  style={{ flex: 1, height: 42 }}
+                  onClick={() => setShowResetModal(false)}
+                >
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  className="flow-auth-submit-btn"
+                  style={{ flex: 1.5, height: 42, marginTop: 0 }}
+                  disabled={resetLoading}
+                >
+                  {resetLoading ? 'Memproses...' : 'Simpan Password Baru'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

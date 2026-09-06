@@ -37,6 +37,7 @@ import { ExportModal } from './components/ExportModal';
 import { ShortcutsModal } from './components/ShortcutsModal';
 import { ConfirmModal } from './components/ConfirmModal';
 import { AuthPage } from './components/AuthPage';
+import { ProfileModal } from './components/ProfileModal';
 import { createActivityLog } from './utils/activityHelper';
 import {
   KanbanSquare,
@@ -60,22 +61,57 @@ import './styles/app.css';
 import './styles/clickup-theme.css';
 import './styles/flowwork-theme.css';
 
-// Helper to retrieve isolated workspace data or fallback to defaults
-const loadWorkspaceData = (wsId) => {
+// Helper to retrieve active user session (from sessionStorage or localStorage)
+const getInitialUser = () => {
   try {
-    const saved = localStorage.getItem(`flowwork_data_${wsId}`);
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      // Auto-migrate if old corporate tasks detected
-      const isLegacyCorporate = parsed.tasks && parsed.tasks.some(t => t.title && (t.title.includes('RBAC') || t.title.includes('JWT') || t.title.includes('FinTech')));
-      if (!isLegacyCorporate) {
-        return {
-          tasks: parsed.tasks || [],
-          columns: parsed.columns || INITIAL_COLUMNS,
-          spaces: parsed.spaces || INITIAL_SPACES,
-          notes: parsed.notes || INITIAL_NOTES,
-          channels: parsed.channels || ['diskusi-umum', 'tugas-kelompok', 'catatan-kuliah']
-        };
+    const sessionSaved = sessionStorage.getItem('flowwork_auth_user');
+    if (sessionSaved) return JSON.parse(sessionSaved);
+    const localSaved = localStorage.getItem('flowwork_auth_user');
+    if (localSaved) return JSON.parse(localSaved);
+    return null;
+  } catch {
+    return null;
+  }
+};
+
+// Helper to retrieve isolated workspace data per user or fallback to defaults
+const loadWorkspaceData = (wsId, userId) => {
+  try {
+    const uPrefix = userId ? `u_${userId}` : 'u_guest';
+    const userSpecificKey = `flowwork_${uPrefix}_data_${wsId}`;
+    const userSaved = localStorage.getItem(userSpecificKey);
+    if (userSaved) {
+      const parsed = JSON.parse(userSaved);
+      return {
+        tasks: parsed.tasks || [],
+        columns: parsed.columns || INITIAL_COLUMNS,
+        spaces: parsed.spaces || INITIAL_SPACES,
+        notes: parsed.notes || INITIAL_NOTES,
+        channels: parsed.channels || ['diskusi-umum', 'tugas-kelompok', 'catatan-kuliah']
+      };
+    }
+
+    // Seamless fallback for default Kurnia / demo account
+    if (!userId || userId === 'kurnia') {
+      const legacySaved = localStorage.getItem(`flowwork_data_${wsId}`);
+      if (legacySaved) {
+        const parsed = JSON.parse(legacySaved);
+        const isLegacyCorporate =
+          parsed.tasks &&
+          parsed.tasks.some(
+            (t) =>
+              t.title &&
+              (t.title.includes('RBAC') || t.title.includes('JWT') || t.title.includes('FinTech'))
+          );
+        if (!isLegacyCorporate) {
+          return {
+            tasks: parsed.tasks || [],
+            columns: parsed.columns || INITIAL_COLUMNS,
+            spaces: parsed.spaces || INITIAL_SPACES,
+            notes: parsed.notes || INITIAL_NOTES,
+            channels: parsed.channels || ['diskusi-umum', 'tugas-kelompok', 'catatan-kuliah']
+          };
+        }
       }
     }
   } catch (e) {
@@ -85,13 +121,19 @@ const loadWorkspaceData = (wsId) => {
 };
 
 export function App() {
+  // User Authentication & Session State (Early init for data isolation)
+  const [currentUser, setCurrentUser] = useState(getInitialUser);
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+
   // Workspaces Management
   const [workspaces, setWorkspaces] = useState(() => {
     try {
       const saved = localStorage.getItem('flowwork_workspaces');
       if (saved) {
         const parsed = JSON.parse(saved);
-        const hasLegacy = parsed.some(w => w.name === "Kurnia's Workspace" || w.name === "Product Engineering Q3");
+        const hasLegacy = parsed.some(
+          (w) => w.name === "Kurnia's Workspace" || w.name === 'Product Engineering Q3'
+        );
         if (!hasLegacy && parsed.length > 0) {
           return parsed;
         }
@@ -110,7 +152,8 @@ export function App() {
     }
   });
 
-  const activeWorkspace = workspaces.find((w) => w.id === activeWorkspaceId) || workspaces[0] || INITIAL_WORKSPACES[0];
+  const activeWorkspace =
+    workspaces.find((w) => w.id === activeWorkspaceId) || workspaces[0] || INITIAL_WORKSPACES[0];
   const workspaceName = activeWorkspace?.name || 'Kuliah & Studi';
 
   const handleRenameWorkspace = (newName) => {
@@ -120,13 +163,13 @@ export function App() {
   };
   const setWorkspaceName = handleRenameWorkspace;
 
-  // Isolated Workspace Data States
+  // Isolated Workspace Data States (bound to user and active workspace)
   const [tasks, setTasks] = useState(() => {
     let initialWs = 'ws-1';
     try {
       initialWs = localStorage.getItem('flowwork_active_workspace_id') || 'ws-1';
     } catch {}
-    return loadWorkspaceData(initialWs).tasks;
+    return loadWorkspaceData(initialWs, getInitialUser()?.id).tasks;
   });
 
   const [columns, setColumns] = useState(() => {
@@ -134,7 +177,7 @@ export function App() {
     try {
       initialWs = localStorage.getItem('flowwork_active_workspace_id') || 'ws-1';
     } catch {}
-    return loadWorkspaceData(initialWs).columns;
+    return loadWorkspaceData(initialWs, getInitialUser()?.id).columns;
   });
 
   const [spaces, setSpaces] = useState(() => {
@@ -142,7 +185,7 @@ export function App() {
     try {
       initialWs = localStorage.getItem('flowwork_active_workspace_id') || 'ws-1';
     } catch {}
-    return loadWorkspaceData(initialWs).spaces;
+    return loadWorkspaceData(initialWs, getInitialUser()?.id).spaces;
   });
 
   const [notes, setNotes] = useState(() => {
@@ -150,7 +193,7 @@ export function App() {
     try {
       initialWs = localStorage.getItem('flowwork_active_workspace_id') || 'ws-1';
     } catch {}
-    return loadWorkspaceData(initialWs).notes;
+    return loadWorkspaceData(initialWs, getInitialUser()?.id).notes;
   });
 
   const [channels, setChannels] = useState(() => {
@@ -158,7 +201,7 @@ export function App() {
     try {
       initialWs = localStorage.getItem('flowwork_active_workspace_id') || 'ws-1';
     } catch {}
-    return loadWorkspaceData(initialWs).channels;
+    return loadWorkspaceData(initialWs, getInitialUser()?.id).channels;
   });
 
   const [theme, setTheme] = useState(() => {
@@ -387,22 +430,60 @@ export function App() {
     setToasts((prev) => prev.filter((t) => t.id !== id));
   };
 
-  // User Authentication & Session State
-  const [currentUser, setCurrentUser] = useState(() => {
-    try {
-      const saved = localStorage.getItem('flowwork_auth_user');
-      if (saved) return JSON.parse(saved);
-      return null;
-    } catch {
-      return null;
-    }
-  });
+  // Multi-Tab Session Synchronization
+  useEffect(() => {
+    const handleStorageChange = (e) => {
+      if (e.key === 'flowwork_auth_user') {
+        if (!e.newValue) {
+          setCurrentUser(null);
+          addToast('Sesi Anda telah keluar dari tab lain.', 'info');
+        } else {
+          try {
+            const newUser = JSON.parse(e.newValue);
+            setCurrentUser(newUser);
+          } catch {}
+        }
+      }
+    };
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
 
-  const handleLoginSuccess = (user) => {
+  const handleLoginSuccess = (user, rememberMe = true) => {
     setCurrentUser(user);
     try {
-      localStorage.setItem('flowwork_auth_user', JSON.stringify(user));
+      if (rememberMe) {
+        localStorage.setItem('flowwork_auth_user', JSON.stringify(user));
+        sessionStorage.removeItem('flowwork_auth_user');
+      } else {
+        sessionStorage.setItem('flowwork_auth_user', JSON.stringify(user));
+        localStorage.removeItem('flowwork_auth_user');
+      }
     } catch {}
+
+    // Load isolated workspace data for this user
+    const userWsData = loadWorkspaceData(activeWorkspaceId, user.id);
+    setTasks(userWsData.tasks);
+    setColumns(userWsData.columns);
+    setSpaces(userWsData.spaces);
+    setNotes(userWsData.notes);
+    setChannels(userWsData.channels);
+
+    // Sync member card if exists
+    setMembers((prev) =>
+      prev.map((m) =>
+        m.id === 'kurnia' || m.email === user.email
+          ? {
+              ...m,
+              name: user.name,
+              avatar: user.avatar,
+              color: user.avatarColor || m.color,
+              role: user.role
+            }
+          : m
+      )
+    );
+
     addToast(`Selamat datang di FlowWork, ${user.name}! 👋`, 'success');
   };
 
@@ -410,8 +491,57 @@ export function App() {
     setCurrentUser(null);
     try {
       localStorage.removeItem('flowwork_auth_user');
+      sessionStorage.removeItem('flowwork_auth_user');
     } catch {}
     addToast('Anda telah keluar dari akun.', 'info');
+  };
+
+  const handleUpdateUserProfile = (updatedUser) => {
+    setCurrentUser(updatedUser);
+    try {
+      if (localStorage.getItem('flowwork_auth_user')) {
+        localStorage.setItem('flowwork_auth_user', JSON.stringify(updatedUser));
+      }
+      if (sessionStorage.getItem('flowwork_auth_user')) {
+        sessionStorage.setItem('flowwork_auth_user', JSON.stringify(updatedUser));
+      }
+
+      // Sync registered accounts list
+      const savedAccounts = JSON.parse(localStorage.getItem('flowwork_registered_accounts') || '[]');
+      const idx = savedAccounts.findIndex(
+        (acc) =>
+          acc.id === updatedUser.id ||
+          acc.email.toLowerCase() === updatedUser.email?.toLowerCase()
+      );
+      if (idx !== -1) {
+        savedAccounts[idx] = {
+          ...savedAccounts[idx],
+          name: updatedUser.name,
+          role: updatedUser.role,
+          category: updatedUser.category,
+          avatar: updatedUser.avatar,
+          avatarColor: updatedUser.avatarColor
+        };
+        localStorage.setItem('flowwork_registered_accounts', JSON.stringify(savedAccounts));
+      }
+
+      // Sync workspace owner card in members list
+      setMembers((prev) =>
+        prev.map((m) =>
+          m.id === 'kurnia' || m.isOwner || m.email === updatedUser.email
+            ? {
+                ...m,
+                name: updatedUser.name,
+                avatar: updatedUser.avatar,
+                color: updatedUser.avatarColor || m.color,
+                role: updatedUser.role
+              }
+            : m
+        )
+      );
+    } catch (e) {
+      console.error('Error updating user profile', e);
+    }
   };
 
   // Multi-Workspace Isolation Handlers
@@ -421,20 +551,27 @@ export function App() {
     // 1. Immediately flush current workspace state to its storage key
     try {
       const currentPayload = { tasks, columns, spaces, notes, channels };
-      localStorage.setItem(`flowwork_data_${activeWorkspaceId}`, JSON.stringify(currentPayload));
-      if (activeWorkspaceId === 'ws-1') {
-        localStorage.setItem('flowwork_tasks', JSON.stringify(tasks));
-        localStorage.setItem('flowwork_columns', JSON.stringify(columns));
-        localStorage.setItem('flowwork_spaces', JSON.stringify(spaces));
-        localStorage.setItem('flowwork_notes', JSON.stringify(notes));
-        localStorage.setItem('flowwork_channels', JSON.stringify(channels));
+      const uPrefix = currentUser?.id ? `u_${currentUser.id}` : 'u_guest';
+      localStorage.setItem(
+        `flowwork_${uPrefix}_data_${activeWorkspaceId}`,
+        JSON.stringify(currentPayload)
+      );
+      if (!currentUser || currentUser.id === 'kurnia') {
+        localStorage.setItem(`flowwork_data_${activeWorkspaceId}`, JSON.stringify(currentPayload));
+        if (activeWorkspaceId === 'ws-1') {
+          localStorage.setItem('flowwork_tasks', JSON.stringify(tasks));
+          localStorage.setItem('flowwork_columns', JSON.stringify(columns));
+          localStorage.setItem('flowwork_spaces', JSON.stringify(spaces));
+          localStorage.setItem('flowwork_notes', JSON.stringify(notes));
+          localStorage.setItem('flowwork_channels', JSON.stringify(channels));
+        }
       }
     } catch (e) {
       console.error('Failed to flush current workspace data:', e);
     }
 
     // 2. Load target workspace data
-    const targetData = loadWorkspaceData(targetWsId);
+    const targetData = loadWorkspaceData(targetWsId, currentUser?.id);
 
     // 3. Update active workspace ID
     setActiveWorkspaceId(targetWsId);
@@ -816,25 +953,32 @@ export function App() {
   const [selectedTaskId, setSelectedTaskId] = useState('');
   const [completedSessions, setCompletedSessions] = useState(0);
 
-  // Debounced Sync LocalStorage (Isolated per workspace)
+  // Debounced Sync LocalStorage (Isolated per user and workspace)
   useEffect(() => {
     const handler = setTimeout(() => {
       try {
         const payload = { tasks, columns, spaces, notes, channels };
-        localStorage.setItem(`flowwork_data_${activeWorkspaceId}`, JSON.stringify(payload));
-        if (activeWorkspaceId === 'ws-1') {
-          localStorage.setItem('flowwork_tasks', JSON.stringify(tasks));
-          localStorage.setItem('flowwork_columns', JSON.stringify(columns));
-          localStorage.setItem('flowwork_spaces', JSON.stringify(spaces));
-          localStorage.setItem('flowwork_notes', JSON.stringify(notes));
-          localStorage.setItem('flowwork_channels', JSON.stringify(channels));
+        const uPrefix = currentUser?.id ? `u_${currentUser.id}` : 'u_guest';
+        localStorage.setItem(
+          `flowwork_${uPrefix}_data_${activeWorkspaceId}`,
+          JSON.stringify(payload)
+        );
+        if (!currentUser || currentUser.id === 'kurnia') {
+          localStorage.setItem(`flowwork_data_${activeWorkspaceId}`, JSON.stringify(payload));
+          if (activeWorkspaceId === 'ws-1') {
+            localStorage.setItem('flowwork_tasks', JSON.stringify(tasks));
+            localStorage.setItem('flowwork_columns', JSON.stringify(columns));
+            localStorage.setItem('flowwork_spaces', JSON.stringify(spaces));
+            localStorage.setItem('flowwork_notes', JSON.stringify(notes));
+            localStorage.setItem('flowwork_channels', JSON.stringify(channels));
+          }
         }
       } catch (e) {
         console.error(e);
       }
     }, 350);
     return () => clearTimeout(handler);
-  }, [tasks, columns, spaces, notes, channels, activeWorkspaceId]);
+  }, [tasks, columns, spaces, notes, channels, activeWorkspaceId, currentUser?.id]);
 
   useEffect(() => {
     try {
@@ -1450,6 +1594,7 @@ export function App() {
           onShowToast={addToast}
           currentUser={currentUser}
           onLogout={handleLogout}
+          onOpenProfile={() => setIsProfileModalOpen(true)}
           onNotificationClick={(taskId) => {
             const t = tasks.find((x) => x.id === taskId);
             if (t) handleTaskClick(t);
@@ -2066,6 +2211,15 @@ export function App() {
       <ShortcutsModal
         isOpen={isShortcutsModalOpen}
         onClose={() => setIsShortcutsModalOpen(false)}
+      />
+
+      {/* User Profile & Account Settings Modal */}
+      <ProfileModal
+        isOpen={isProfileModalOpen}
+        onClose={() => setIsProfileModalOpen(false)}
+        currentUser={currentUser}
+        onUpdateUser={handleUpdateUserProfile}
+        onShowToast={addToast}
       />
 
       {/* Toast Notifications */}

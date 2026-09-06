@@ -380,3 +380,112 @@
   gap: 8px;
   animation: fadeIn 0.15s ease;
 }
+
+/* Password Strength Indicator */
+.flow-auth-strength-wrap {
+  margin-top: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.flow-auth-strength-bars {
+  display: flex;
+  gap: 4px;
+  height: 4px;
+  width: 100%;
+}
+
+.flow-auth-strength-bar {
+  flex: 1;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--flow-border-subtle);
+  transition: background 0.2s ease;
+}
+
+.flow-auth-strength-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.68rem;
+  color: var(--flow-text-muted);
+}
+
+.flow-auth-strength-label {
+  font-weight: 700;
+}
+
+/* Password Match Indicator */
+.flow-auth-match-badge {
+  font-size: 0.72rem;
+  font-weight: 600;
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Reset Password Modal */
+.flow-auth-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.flow-auth-modal-card {
+  width: 100%;
+  max-width: 420px;
+  background: var(--flow-bg-surface);
+  border: 1px solid var(--flow-border-subtle);
+  border-radius: 18px;
+  padding: 28px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35);
+  animation: slideUp 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.flow-auth-modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.flow-auth-modal-title {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--flow-text-main);
+  letter-spacing: -0.01em;
+}
+
+.flow-auth-modal-subtitle {
+  font-size: 0.78rem;
+  color: var(--flow-text-muted);
+  margin-top: 4px;
+  line-height: 1.4;
+}
+
+.flow-auth-modal-close {
+  background: none;
+  border: none;
+  color: var(--flow-text-muted);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.flow-auth-modal-close:hover {
+  background: var(--flow-bg-canvas);
+  color: var(--flow-text-main);
+}
+
