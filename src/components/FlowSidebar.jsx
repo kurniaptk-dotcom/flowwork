@@ -18,7 +18,9 @@ import {
   Check,
   Building,
   Edit2,
-  X
+  X,
+  Flame,
+  Brain
 } from 'lucide-react';
 import { SmartScratchpad } from './SmartScratchpad';
 
@@ -53,13 +55,18 @@ export const FlowSidebar = ({
   const [isAddingChannel, setIsAddingChannel] = useState(false);
   const [newChannelName, setNewChannelName] = useState('');
 
-  const navItems = [
+  const workspaceNavItems = [
     { id: 'dashboards', label: 'Dashboard & Ringkasan', icon: LayoutDashboard },
     { id: 'spaces', label: 'Proyek & Tugas', icon: FolderKanban },
-    { id: 'home', label: 'Aktivitas & Inbox', icon: Home },
     { id: 'planner', label: 'Jadwal & Kalender', icon: Calendar },
-    { id: 'brain', label: 'KeepWork AI', icon: Sparkles, badge: 'AI' },
+    { id: 'home', label: 'Aktivitas & Inbox', icon: Home },
     { id: 'teams', label: 'Teman Kolaborasi', icon: Users }
+  ];
+
+  const personalNavItems = [
+    { id: 'habits', label: 'Habit Tracker', icon: Flame, badge: 'Streak', badgeColor: 'rgba(245, 158, 11, 0.2)', badgeTextColor: '#f59e0b' },
+    { id: 'second-brain', label: 'Second Brain', icon: Brain, badge: 'PARA', badgeColor: 'rgba(99, 102, 241, 0.2)', badgeTextColor: 'var(--flow-primary)' },
+    { id: 'brain', label: 'KeepWork AI', icon: Sparkles, badge: 'AI', badgeColor: 'var(--flow-pilot-gradient)', badgeTextColor: '#ffffff' }
   ];
 
   const handleNavClick = (moduleId) => {
@@ -145,9 +152,41 @@ export const FlowSidebar = ({
 
       {/* 2. Navigation Body */}
       <div className="flow-sidebar-body">
-        {/* Core Navigation Items */}
+        {/* Workspace Navigation Group */}
         <div className="flow-nav-group">
-          {navItems.map((item) => {
+          {(!isCollapsed || isMobileOpen) && (
+            <div className="flow-nav-heading" style={{ fontSize: '0.68rem', fontWeight: 700, letterSpacing: '0.06em', color: 'var(--flow-text-muted)', marginBottom: 6 }}>
+              RUANG KERJA
+            </div>
+          )}
+          {workspaceNavItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = activeModule === item.id;
+
+            return (
+              <div
+                key={item.id}
+                className={`flow-nav-item ${isActive ? 'active' : ''}`}
+                onClick={() => handleNavClick(item.id)}
+                title={item.label}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <Icon size={16} />
+                  {(!isCollapsed || isMobileOpen) && <span>{item.label}</span>}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Personal Productivity Navigation Group */}
+        <div className="flow-nav-group" style={{ marginTop: 12 }}>
+          {(!isCollapsed || isMobileOpen) && (
+            <div className="flow-nav-heading" style={{ fontSize: '0.68rem', fontWeight: 700, letterSpacing: '0.06em', color: 'var(--flow-text-muted)', marginBottom: 6 }}>
+              PRODUKTIVITAS PRIBADI
+            </div>
+          )}
+          {personalNavItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeModule === item.id;
 
@@ -166,12 +205,12 @@ export const FlowSidebar = ({
                 {!isCollapsed && item.badge && (
                   <span
                     style={{
-                      fontSize: '0.66rem',
+                      fontSize: '0.64rem',
                       fontWeight: 700,
                       padding: '1px 6px',
                       borderRadius: 4,
-                      background: 'var(--flow-pilot-gradient)',
-                      color: '#ffffff'
+                      background: item.badgeColor || 'var(--flow-pilot-gradient)',
+                      color: item.badgeTextColor || '#ffffff'
                     }}
                   >
                     {item.badge}

@@ -7,7 +7,9 @@ import {
   INITIAL_SPACES,
   INITIAL_TAGS,
   INITIAL_MEMBERS,
-  INITIAL_PRIORITIES
+  INITIAL_PRIORITIES,
+  INITIAL_HABITS,
+  INITIAL_SECOND_BRAIN_NOTES
 } from './data/initialData';
 import {
   INITIAL_WORKSPACES,
@@ -20,6 +22,8 @@ import { InboxView } from './components/InboxView';
 import { FlowPilotView } from './components/FlowPilotView';
 import { TeamsHubView } from './components/TeamsHubView';
 import { DashboardsHubView } from './components/DashboardsHubView';
+import { HabitTrackerView } from './components/HabitTrackerView';
+import { SecondBrainView } from './components/SecondBrainView';
 import { KanbanBoard } from './components/KanbanBoard';
 import { ListView } from './components/ListView';
 import { CalendarView } from './components/CalendarView';
@@ -320,6 +324,85 @@ export function App() {
   const handleOpenExportModal = () => setDataModalConfig({ isOpen: true, tab: 'export' });
   const handleOpenImportModal = () => setDataModalConfig({ isOpen: true, tab: 'import' });
 
+  // Habit Tracker State (Personal Productivity - Isolated per user)
+  const [habits, setHabits] = useState(() => {
+    try {
+      const uPrefix = currentUser?.id ? `u_${currentUser.id}` : 'u_guest';
+      const saved =
+        localStorage.getItem(`keepwork_${uPrefix}_habits`) ||
+        localStorage.getItem(`flowwork_${uPrefix}_habits`) ||
+        localStorage.getItem('keepwork_habits');
+      if (saved) return JSON.parse(saved);
+      return INITIAL_HABITS;
+    } catch {
+      return INITIAL_HABITS;
+    }
+  });
+
+  // Second Brain Knowledge Hub State (P.A.R.A - Isolated per user)
+  const [secondBrainNotes, setSecondBrainNotes] = useState(() => {
+    try {
+      const uPrefix = currentUser?.id ? `u_${currentUser.id}` : 'u_guest';
+      const saved =
+        localStorage.getItem(`keepwork_${uPrefix}_second_brain`) ||
+        localStorage.getItem(`flowwork_${uPrefix}_second_brain`) ||
+        localStorage.getItem('keepwork_second_brain');
+      if (saved) return JSON.parse(saved);
+      return INITIAL_SECOND_BRAIN_NOTES;
+    } catch {
+      return INITIAL_SECOND_BRAIN_NOTES;
+    }
+  });
+
+  const handleUpdateHabits = (newHabits) => {
+    setHabits(newHabits);
+    try {
+      const uPrefix = currentUser?.id ? `u_${currentUser.id}` : 'u_guest';
+      localStorage.setItem(`keepwork_${uPrefix}_habits`, JSON.stringify(newHabits));
+    } catch (e) {
+      console.error('Error saving habits', e);
+    }
+  };
+
+  const handleUpdateSecondBrainNotes = (newNotes) => {
+    setSecondBrainNotes(newNotes);
+    try {
+      const uPrefix = currentUser?.id ? `u_${currentUser.id}` : 'u_guest';
+      localStorage.setItem(`keepwork_${uPrefix}_second_brain`, JSON.stringify(newNotes));
+    } catch (e) {
+      console.error('Error saving second brain notes', e);
+    }
+  };
+
+  const handleConvertNoteToTask = (payload) => {
+    const targetSpaceId = activeSpaceId !== 'all' ? activeSpaceId : (spaces[0]?.id || 'skripsi');
+    const newTask = {
+      id: 'task-' + Date.now(),
+      projectId: targetSpaceId,
+      title: payload.title,
+      description: payload.description || '',
+      status: 'todo',
+      priority: payload.priority || 'normal',
+      dueDate: new Date().toISOString().split('T')[0],
+      tags: payload.tags || ['#second-brain'],
+      assignee: currentUser?.id || 'kurnia',
+      estimatedHours: 2,
+      loggedMinutes: 0,
+      subtasks: [],
+      activityLog: [
+        {
+          id: 'act-' + Date.now(),
+          text: `Dikonversi dari Second Brain Knowledge Hub`,
+          timestamp: 'Baru saja'
+        }
+      ]
+    };
+    setTasks((prev) => [newTask, ...prev]);
+    if (isSupabaseConfigured && currentUser?.isCloud) {
+      cloudInsertTask(newTask, activeWorkspaceId).catch(() => {});
+    }
+  };
+
   // Unified Global Keyboard Shortcuts (Ctrl + K, ?, N, Esc)
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -604,6 +687,15 @@ export function App() {
     setSpaces(userWsData.spaces);
     setNotes(userWsData.notes);
     setChannels(userWsData.channels);
+
+    // Load isolated habits & second brain notes
+    try {
+      const uPref = user.id ? `u_${user.id}` : 'u_guest';
+      const userHabits = localStorage.getItem(`keepwork_${uPref}_habits`);
+      if (userHabits) setHabits(JSON.parse(userHabits));
+      const userNotes = localStorage.getItem(`keepwork_${uPref}_second_brain`);
+      if (userNotes) setSecondBrainNotes(JSON.parse(userNotes));
+    } catch {}
 
     // If cloud user, trigger cloud fetch & initial seed
     if (isSupabaseConfigured && user.isCloud) {
@@ -1998,6 +2090,25 @@ export function App() {
             onTaskClick={handleTaskClick}
             onOpenNewTask={handleOpenNewTask}
             onShowToast={addToast}
+          />
+        )}
+
+        {activeModule === 'habits' && (
+          <HabitTrackerView
+            habits={habits}
+            onUpdateHabits={handleUpdateHabits}
+            onAddToast={addToast}
+            currentUser={currentUser}
+          />
+        )}
+
+        {activeModule === 'second-brain' && (
+          <SecondBrainView
+            notes={secondBrainNotes}
+            onUpdateNotes={handleUpdateSecondBrainNotes}
+            onConvertToTask={handleConvertNoteToTask}
+            onAddToast={addToast}
+            onOpenFlowPilot={() => setActiveModule('brain')}
           />
         )}
 

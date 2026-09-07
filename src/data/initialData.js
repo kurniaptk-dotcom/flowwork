@@ -223,3 +223,159 @@ export const INITIAL_NOTES = `📌 Target Fokus Pekan Ini:
 - Prioritas Utama: Bimbingan Bab 2 Skripsi & tuntaskan laporan praktikum Basis Data.
 - Target Harian: Terapkan metode Pomodoro (3 sesi x 25 menit fokus belajar tanpa distrak sosmed).
 - Pengingat: Cek batas waktu upload e-learning kampus sebelum jam 23:59 WIB!`;
+
+const currentIsoDate = new Date().toISOString().split('T')[0];
+const getPastIsoDate = (daysAgo) => {
+  const d = new Date();
+  d.setDate(d.getDate() - daysAgo);
+  return d.toISOString().split('T')[0];
+};
+
+export const INITIAL_HABITS = [
+  {
+    id: 'habit-1',
+    title: 'Membaca Jurnal / Literatur Skripsi (25m)',
+    category: 'Belajar & Skripsi',
+    emoji: '📚',
+    timeOfDay: 'morning',
+    goal: '1x sehari',
+    color: '#6366f1',
+    streak: 4,
+    bestStreak: 7,
+    history: {
+      [getPastIsoDate(3)]: true,
+      [getPastIsoDate(2)]: true,
+      [getPastIsoDate(1)]: true,
+      [currentIsoDate]: true
+    },
+    createdAt: new Date().toISOString()
+  },
+  {
+    id: 'habit-2',
+    title: 'Minum Air Mineral 2 Liter',
+    category: 'Kesehatan & Kebugaran',
+    emoji: '💧',
+    timeOfDay: 'anytime',
+    goal: '8 gelas/hari',
+    color: '#06b6d4',
+    streak: 6,
+    bestStreak: 14,
+    history: {
+      [getPastIsoDate(4)]: true,
+      [getPastIsoDate(3)]: true,
+      [getPastIsoDate(2)]: true,
+      [getPastIsoDate(1)]: true,
+      [currentIsoDate]: true
+    },
+    createdAt: new Date().toISOString()
+  },
+  {
+    id: 'habit-3',
+    title: 'Sesi Deep Work & Coding (Pomodoro)',
+    category: 'Karir & Finansial',
+    emoji: '💻',
+    timeOfDay: 'afternoon',
+    goal: '2 sesi (50m)',
+    color: '#10b981',
+    streak: 3,
+    bestStreak: 6,
+    history: {
+      [getPastIsoDate(2)]: true,
+      [getPastIsoDate(1)]: true
+    },
+    createdAt: new Date().toISOString()
+  },
+  {
+    id: 'habit-4',
+    title: 'Olahraga Ringan / Jalan Kaki 20 Menit',
+    category: 'Kesehatan & Kebugaran',
+    emoji: '🏃‍♂️',
+    timeOfDay: 'morning',
+    goal: '1x sehari',
+    color: '#f59e0b',
+    streak: 2,
+    bestStreak: 5,
+    history: {
+      [getPastIsoDate(1)]: true,
+      [currentIsoDate]: true
+    },
+    createdAt: new Date().toISOString()
+  },
+  {
+    id: 'habit-5',
+    title: 'Refleksi Harian & Review Prioritas Esok',
+    category: 'Mindfulness & Jiwa',
+    emoji: '✍️',
+    timeOfDay: 'evening',
+    goal: '1x malam',
+    color: '#ec4899',
+    streak: 5,
+    bestStreak: 8,
+    history: {
+      [getPastIsoDate(4)]: true,
+      [getPastIsoDate(3)]: true,
+      [getPastIsoDate(2)]: true,
+      [getPastIsoDate(1)]: true
+    },
+    createdAt: new Date().toISOString()
+  }
+];
+
+export const INITIAL_SECOND_BRAIN_NOTES = [
+  {
+    id: 'sb-1',
+    title: 'Framework Pemilihan Metodologi Penelitian Skripsi (Agile vs Waterfall)',
+    content: 'Gunakan metode Scrum/Agile jika pengembangan sistem sering melibatkan iterasi fitur dan pengujian pengguna langsung. Cantumkan use case diagram, activity diagram, serta skema pengujian Blackbox & SUS (System Usability Scale) di Bab 3.',
+    paraCategory: 'projects',
+    tags: ['#skripsi', '#metodologi', '#bab3'],
+    pinned: true,
+    color: '#6366f1',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  },
+  {
+    id: 'sb-2',
+    title: 'Panduan Manajemen Cashflow Freelancer & Solopreneur',
+    content: 'Alokasikan pendapatan proyek: 50% kebutuhan operasional & hidup, 30% cadangan kas darurat & pajak, 20% investasi leher ke atas (kursus, sertifikasi, cloud server). Jangan satukan rekening bisnis dengan rekening belanja pribadi.',
+    paraCategory: 'areas',
+    tags: ['#finansial', '#freelance', '#pribadi'],
+    pinned: true,
+    color: '#10b981',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  },
+  {
+    id: 'sb-3',
+    title: 'Kumpulan Prompt AI Canggih untuk Analisis & Debugging',
+    content: 'Format prompt audit: "Bertindaklah sebagai Senior Fullstack Architect. Tinjau struktur komponen berikut dari sudut pandang reusability, re-render yang tidak perlu, dan keamanan input pengguna. Berikan saran refactoring yang konkret."',
+    paraCategory: 'resources',
+    tags: ['#ai', '#prompt', '#engineering'],
+    pinned: false,
+    color: '#06b6d4',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  },
+  {
+    id: 'sb-4',
+    title: 'Rangkuman Intisari Atomic Habits - James Clear',
+    content: 'Empat kaidah pembentukan kebiasaan baru:\n1. Make it obvious (Jadikan terlihat jelas - letakkan buku di meja kerja).\n2. Make it attractive (Gabungkan dengan hal yang disukai).\n3. Make it easy (Mulai dari 2 menit pertama).\n4. Make it satisfying (Gunakan habit tracker & rayakan setiap streak).',
+    paraCategory: 'resources',
+    tags: ['#buku', '#kebiasaan', '#mindset'],
+    pinned: false,
+    color: '#f59e0b',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  },
+  {
+    id: 'sb-5',
+    title: 'Arsip Dokumen Proposal Sponsorship Seminar Nasional 2025',
+    content: 'Dokumentasi paket benefit sponsor (Platinum, Gold, Silver) dan daftar feedback evaluator. Gunakan struktur anggaran dan timeline ini sebagai acuan kepanitiaan tahun depan.',
+    paraCategory: 'archives',
+    tags: ['#organisasi', '#kampus', '#arsip'],
+    pinned: false,
+    color: '#8b5cf6',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  }
+];
+

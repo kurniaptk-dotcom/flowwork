@@ -18,7 +18,9 @@ import {
   X,
   CheckCircle2,
   Clock,
-  AlertCircle
+  AlertCircle,
+  Flame,
+  Brain
 } from 'lucide-react';
 
 export const CommandPaletteModal = ({
@@ -121,6 +123,30 @@ export const CommandPaletteModal = ({
       icon: Users,
       action: () => {
         setActiveModule('teams');
+        onClose();
+      }
+    },
+    {
+      id: 'nav-habits',
+      category: 'Produktivitas Pribadi',
+      title: 'Buka Habit Tracker & Rutinitas Harian',
+      subtitle: 'Pantau streak kebiasaan harian dan weekly matrix',
+      icon: Flame,
+      badge: 'Streak',
+      action: () => {
+        setActiveModule('habits');
+        onClose();
+      }
+    },
+    {
+      id: 'nav-second-brain',
+      category: 'Produktivitas Pribadi',
+      title: 'Buka Second Brain (Knowledge Hub P.A.R.A)',
+      subtitle: 'Pusat catatan riset, referensi jurnal, dan ide terstruktur',
+      icon: Brain,
+      badge: 'PARA',
+      action: () => {
+        setActiveModule('second-brain');
         onClose();
       }
     }
