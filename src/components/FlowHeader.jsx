@@ -456,9 +456,9 @@ export const FlowHeader = ({
             </span>
           </div>
 
-          <button className="flow-pilot-trigger" onClick={onOpenFlowPilot}>
+          <button className="flow-pilot-trigger" onClick={onOpenFlowPilot} title="Buka KeepWork AI (Asisten Produktivitas)">
             <Sparkles size={13} />
-            <span>FlowPilot AI</span>
+            <span>KeepWork AI</span>
           </button>
         </div>
 

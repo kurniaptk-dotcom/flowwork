@@ -37,10 +37,10 @@ export const DashboardsHubView = ({
     {
       id: 'ai-center',
       title: 'AI Productivity Hub',
-      subtitle: 'Asisten FlowPilot & ringkasan cerdas',
+      subtitle: 'Asisten KeepWork AI & ringkasan cerdas',
       icon: Sparkles,
       color: '#ff007f',
-      badge: 'FlowPilot'
+      badge: 'KeepWork AI'
     },
     {
       id: 'project',
@@ -63,7 +63,7 @@ export const DashboardsHubView = ({
     }
     if (selectedDashboard === 'ai-center') {
       return {
-        title: 'FlowPilot AI & Productivity Intelligence',
+        title: 'KeepWork AI & Productivity Intelligence',
         subtitle: 'Pusat asisten cerdas untuk brainstorming, rekomendasi prioritas tugas, dan mitigasi waktu luang.'
       };
     }

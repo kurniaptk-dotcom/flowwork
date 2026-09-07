@@ -104,7 +104,7 @@ export const CommandPaletteModal = ({
     {
       id: 'nav-brain',
       category: 'Navigasi',
-      title: 'Buka FlowPilot AI Intelligence',
+      title: 'Buka KeepWork AI Intelligence',
       subtitle: 'Asisten cerdas analisis beban kerja dan ringkasan sprint',
       icon: Sparkles,
       badge: 'AI',

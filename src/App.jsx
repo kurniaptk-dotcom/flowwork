@@ -78,9 +78,9 @@ import './styles/flowwork-theme.css';
 // Helper to retrieve active user session (from sessionStorage or localStorage)
 const getInitialUser = () => {
   try {
-    const sessionSaved = sessionStorage.getItem('flowwork_auth_user');
+    const sessionSaved = sessionStorage.getItem('keepwork_auth_user') || sessionStorage.getItem('flowwork_auth_user');
     if (sessionSaved) return JSON.parse(sessionSaved);
-    const localSaved = localStorage.getItem('flowwork_auth_user');
+    const localSaved = localStorage.getItem('keepwork_auth_user') || localStorage.getItem('flowwork_auth_user');
     if (localSaved) return JSON.parse(localSaved);
     return null;
   } catch {
@@ -92,8 +92,8 @@ const getInitialUser = () => {
 const loadWorkspaceData = (wsId, userId) => {
   try {
     const uPrefix = userId ? `u_${userId}` : 'u_guest';
-    const userSpecificKey = `flowwork_${uPrefix}_data_${wsId}`;
-    const userSaved = localStorage.getItem(userSpecificKey);
+    const userSpecificKey = `keepwork_${uPrefix}_data_${wsId}`;
+    const userSaved = localStorage.getItem(userSpecificKey) || localStorage.getItem(`flowwork_${uPrefix}_data_${wsId}`);
     if (userSaved) {
       const parsed = JSON.parse(userSaved);
       return {
@@ -142,7 +142,7 @@ export function App() {
   // Workspaces Management
   const [workspaces, setWorkspaces] = useState(() => {
     try {
-      const saved = localStorage.getItem('flowwork_workspaces');
+      const saved = localStorage.getItem('keepwork_workspaces') || localStorage.getItem('flowwork_workspaces');
       if (saved) {
         const parsed = JSON.parse(saved);
         const hasLegacy = parsed.some(
@@ -160,7 +160,7 @@ export function App() {
 
   const [activeWorkspaceId, setActiveWorkspaceId] = useState(() => {
     try {
-      return localStorage.getItem('flowwork_active_workspace_id') || 'ws-1';
+      return localStorage.getItem('keepwork_active_workspace_id') || localStorage.getItem('flowwork_active_workspace_id') || 'ws-1';
     } catch {
       return 'ws-1';
     }
@@ -244,7 +244,7 @@ export function App() {
               role: 'Workspace Owner & Lead',
               avatar: 'K',
               color: '#00a884',
-              email: 'kurnia@flowwork.id',
+              email: 'kurnia@keepwork.id',
               department: 'Executive',
               status: 'active',
               isOwner: true,
@@ -422,7 +422,7 @@ export function App() {
       const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(exportPayload, null, 2));
       const downloadAnchor = document.createElement('a');
       downloadAnchor.setAttribute('href', dataStr);
-      downloadAnchor.setAttribute('download', `flowwork-${workspaceName.toLowerCase().replace(/\s+/g, '-')}-backup.json`);
+      downloadAnchor.setAttribute('download', `keepwork-${workspaceName.toLowerCase().replace(/\s+/g, '-')}-backup.json`);
       document.body.appendChild(downloadAnchor);
       downloadAnchor.click();
       downloadAnchor.remove();
@@ -585,9 +585,13 @@ export function App() {
     setCurrentUser(user);
     try {
       if (rememberMe) {
+        localStorage.setItem('keepwork_auth_user', JSON.stringify(user));
+        sessionStorage.removeItem('keepwork_auth_user');
         localStorage.setItem('flowwork_auth_user', JSON.stringify(user));
         sessionStorage.removeItem('flowwork_auth_user');
       } else {
+        sessionStorage.setItem('keepwork_auth_user', JSON.stringify(user));
+        localStorage.removeItem('keepwork_auth_user');
         sessionStorage.setItem('flowwork_auth_user', JSON.stringify(user));
         localStorage.removeItem('flowwork_auth_user');
       }
@@ -635,12 +639,14 @@ export function App() {
       )
     );
 
-    addToast(`Selamat datang di FlowWork, ${user.name}! 👋`, 'success');
+    addToast(`Selamat datang di KeepWork, ${user.name}! 👋`, 'success');
   };
 
   const handleLogout = async () => {
     setCurrentUser(null);
     try {
+      localStorage.removeItem('keepwork_auth_user');
+      sessionStorage.removeItem('keepwork_auth_user');
       localStorage.removeItem('flowwork_auth_user');
       sessionStorage.removeItem('flowwork_auth_user');
       if (isSupabaseConfigured) {

@@ -30,7 +30,7 @@ const PLANS = [
     features: [
       'Semua fitur Gratis Selamanya',
       'Ruang Kerja (Workspace) Tanpa Batas',
-      'FlowPilot AI Asisten Belajar & Tugas',
+      'KeepWork AI Asisten Belajar & Tugas',
       'Templat Skripsi, Makalah & Praktikum',
       'Ekspor Laporan PDF & Ringkasan Rapi'
     ]
@@ -49,7 +49,7 @@ const PLANS = [
       'Multi-Klien & Manajemen Proyek Klien',
       'Checklist Proposal & Invoice Proyek',
       'Integrasi Kalender & Pengingat Deadline',
-      'FlowPilot AI Scope & Breakdown Proyek'
+      'KeepWork AI Scope & Breakdown Proyek'
     ]
   },
   {
@@ -94,11 +94,11 @@ export default function UpgradePlanModal({ isOpen, onClose, currentPlan = 'free'
           <div>
             <div className="flow-upgrade-tag">
               <Sparkles size={13} color="var(--flow-primary)" />
-              <span>Paket Pengguna FlowWork</span>
+              <span>Paket Pengguna KeepWork</span>
             </div>
             <h2 className="flow-upgrade-title">Pilih Paket Produktivitas Pribadi</h2>
             <p className="flow-upgrade-sub">
-              Tingkatkan fokus belajar, kelola tugas kuliah, serta raih efisiensi proyek freelance dengan FlowPilot AI dan ruang kerja tanpa batas.
+              Tingkatkan fokus belajar, kelola tugas kuliah, serta raih efisiensi proyek freelance dengan KeepWork AI dan ruang kerja tanpa batas.
             </p>
           </div>
           <button

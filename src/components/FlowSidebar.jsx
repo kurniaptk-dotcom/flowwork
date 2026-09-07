@@ -58,7 +58,7 @@ export const FlowSidebar = ({
     { id: 'spaces', label: 'Proyek & Tugas', icon: FolderKanban },
     { id: 'home', label: 'Aktivitas & Inbox', icon: Home },
     { id: 'planner', label: 'Jadwal & Kalender', icon: Calendar },
-    { id: 'brain', label: 'FlowPilot AI', icon: Sparkles, badge: 'AI' },
+    { id: 'brain', label: 'KeepWork AI', icon: Sparkles, badge: 'AI' },
     { id: 'teams', label: 'Teman Kolaborasi', icon: Users }
   ];
 
@@ -108,11 +108,11 @@ export const FlowSidebar = ({
       {/* 1. Header & Brand */}
       <div className="flow-sidebar-header">
         <div className="flow-brand-badge" onClick={() => handleNavClick('dashboards')}>
-          <div className="flow-logo-mark">F</div>
+          <div className="flow-logo-mark">K</div>
           {(!isCollapsed || isMobileOpen) && (
             <div>
-              <div className="flow-brand-title">FlowWork</div>
-              <div className="flow-brand-subtitle">Workspace OS</div>
+              <div className="flow-brand-title">KeepWork</div>
+              <div className="flow-brand-subtitle">Productivity OS</div>
             </div>
           )}
         </div>

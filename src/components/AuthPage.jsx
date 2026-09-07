@@ -37,7 +37,7 @@ export const AuthPage = ({ onLoginSuccess }) => {
   const [loading, setLoading] = useState(false);
 
   // Login Form States
-  const [loginEmail, setLoginEmail] = useState('kurnia@flowwork.id');
+  const [loginEmail, setLoginEmail] = useState('kurnia@keepwork.id');
   const [loginPassword, setLoginPassword] = useState('kurnia123');
   const [rememberMe, setRememberMe] = useState(true);
 
@@ -413,9 +413,9 @@ export const AuthPage = ({ onLoginSuccess }) => {
       <div className="flow-auth-showcase">
         <div>
           <div className="flow-auth-brand-logo">
-            <div className="flow-auth-logo-icon">F</div>
+            <div className="flow-auth-logo-icon">K</div>
             <div>
-              <div className="flow-auth-brand-name">FlowWork</div>
+              <div className="flow-auth-brand-name">KeepWork</div>
               <div style={{ display: 'flex', gap: 6, alignItems: 'center', marginTop: 3 }}>
                 <div className="flow-auth-brand-badge">B2C Productivity OS</div>
                 {isSupabaseConfigured && (
@@ -443,7 +443,7 @@ export const AuthPage = ({ onLoginSuccess }) => {
           <div style={{ marginTop: 44 }} className="flow-auth-hero-text">
             <h1>Kelola Kuliah, Skripsi & Proyek Klien Tanpa Pusing</h1>
             <p>
-              Papan Kanban interaktif, Pomodoro focus timer, catatan instan, dan asisten cerdas FlowPilot AI dalam satu platform modern.
+              Papan Kanban interaktif, Pomodoro focus timer, catatan instan, dan asisten cerdas KeepWork AI dalam satu platform modern.
             </p>
 
             <div className="flow-auth-feature-list">
@@ -465,7 +465,7 @@ export const AuthPage = ({ onLoginSuccess }) => {
                 <div className="flow-auth-feature-icon" style={{ background: 'rgba(16, 185, 129, 0.15)', color: 'var(--flow-accent-emerald)' }}>
                   <Sparkles size={16} />
                 </div>
-                <span>FlowPilot AI: Analisis prioritas tugas & evaluasi progres mingguan</span>
+                <span>KeepWork AI: Analisis prioritas tugas & evaluasi progres mingguan</span>
               </div>
             </div>
           </div>
@@ -477,7 +477,7 @@ export const AuthPage = ({ onLoginSuccess }) => {
             ★★★★★
           </div>
           <p style={{ fontSize: '0.84rem', color: 'var(--flow-text-main)', margin: '0 0 10px', fontStyle: 'italic', lineHeight: 1.5 }}>
-            "FlowWork bener-bener ngebantu gue nuntasin skripsi tepat waktu sambil tetap handle 3 proyek klien freelance dengan rapi."
+            "KeepWork bener-bener ngebantu gue nuntasin skripsi tepat waktu sambil tetap handle 3 proyek klien freelance dengan rapi."
           </p>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <div

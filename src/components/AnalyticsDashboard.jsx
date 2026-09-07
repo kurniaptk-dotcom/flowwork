@@ -508,7 +508,7 @@ export const AnalyticsDashboard = ({
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   <span className="flow-badge flow-badge-cyan" style={{ fontSize: '0.72rem', padding: '2px 8px' }}>
-                    <Bot size={12} style={{ marginRight: 4 }} /> FlowPilot Team Intelligence
+                    <Bot size={12} style={{ marginRight: 4 }} /> KeepWork AI Team Intelligence
                   </span>
                   <span style={{ fontSize: '0.74rem', color: 'var(--flow-text-muted)' }}>
                     Kesehatan Kolaborasi: 94/100 (Optimal)
@@ -520,8 +520,8 @@ export const AnalyticsDashboard = ({
                 </h3>
                 <p style={{ fontSize: '0.84rem', color: 'var(--flow-text-subtle)', margin: 0, maxWidth: 650, lineHeight: 1.45 }}>
                   {aiRebalanced
-                    ? '✨ Beban kerja tim telah diselaraskan secara otomatis oleh FlowPilot AI. Kapasitas tugas Review & QA dialokasikan secara proporsional kepada Alex Rivera dan Kurnia untuk menjamin rilis tepat waktu.'
-                    : 'FlowPilot mendeteksi 4 kolaborator aktif dengan velocity stabil. Rekomendasi AI: Sarah Chen telah menyelesaikan 100% tugasnya; siap menerima limpahan review dari Dimas Pratama guna mempercepat pengujian akhir.'}
+                    ? '✨ Beban kerja tim telah diselaraskan secara otomatis oleh KeepWork AI. Kapasitas tugas Review & QA dialokasikan secara proporsional kepada Alex Rivera dan Kurnia untuk menjamin rilis tepat waktu.'
+                    : 'KeepWork AI mendeteksi 4 kolaborator aktif dengan velocity stabil. Rekomendasi AI: Sarah Chen telah menyelesaikan 100% tugasnya; siap menerima limpahan review dari Dimas Pratama guna mempercepat pengujian akhir.'}
                 </p>
               </div>
             </div>
@@ -532,7 +532,7 @@ export const AnalyticsDashboard = ({
                 className="flow-pilot-trigger"
                 onClick={() => {
                   setAiRebalanced(true);
-                  if (onShowToast) onShowToast('FlowPilot AI: Beban kerja tim telah berhasil dioptimalkan!', 'success');
+                  if (onShowToast) onShowToast('KeepWork AI: Beban kerja tim telah berhasil dioptimalkan!', 'success');
                 }}
                 title="Otomatis seimbangkan alokasi tugas tim"
               >
@@ -780,7 +780,7 @@ export const AnalyticsDashboard = ({
                 </div>
                 <div style={{ fontSize: '0.8rem', flex: 1 }}>
                   <div style={{ color: 'var(--flow-text-main)', fontWeight: 600 }}>
-                    FlowPilot AI mendeteksi target pekan ini terpenuhi 67%
+                    KeepWork AI mendeteksi target pekan ini terpenuhi 67%
                   </div>
                   <div style={{ fontSize: '0.72rem', color: 'var(--flow-text-muted)', marginTop: 2 }}>
                     Target Tugas On Track • 2 jam lalu
@@ -861,7 +861,7 @@ export const AnalyticsDashboard = ({
                 </div>
 
                 <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: 'var(--flow-text-main)', margin: '6px 0 4px' }}>
-                  FlowPilot AI Produktivitas Diagnostics
+                  KeepWork AI Produktivitas Diagnostics
                 </h3>
                 <p style={{ fontSize: '0.84rem', color: 'var(--flow-text-subtle)', margin: 0, maxWidth: 620, lineHeight: 1.45 }}>
                   {completedTasks >= 2

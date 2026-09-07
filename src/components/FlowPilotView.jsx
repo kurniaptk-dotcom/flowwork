@@ -83,10 +83,10 @@ export const FlowPilotView = ({ tasks = [], onAddTask, onAddToast }) => {
       const urgentTasks = tasks.filter((t) => t.priority === 'urgent').length;
 
       setAiResponse(
-        `⚡ **FlowPilot Intelligence (${selectedModel})**\n\n` +
+        `⚡ **KeepWork AI Intelligence (${selectedModel})**\n\n` +
         `• **Workspace Health:** Dari total **${totalTasks} tugas**, sebanyak **${doneTasks} tugas** telah selesai (${Math.round((doneTasks / (totalTasks || 1)) * 100)}% progress sprint).\n` +
         `• **Prioritas Utama:** Terdapat **${urgentTasks} tugas berkategori Urgent** yang memerlukan tindak lanjut sebelum jadwal sprint berakhir.\n` +
-        `• **Rekomendasi FlowPilot:** Seimbangkan alokasi tugas backend pada Dimas Pratama agar tidak terjadi penumpukan di fase Review & QA.`
+        `• **Rekomendasi KeepWork AI:** Seimbangkan alokasi tugas backend pada Dimas Pratama agar tidak terjadi penumpukan di fase Review & QA.`
       );
     }, 800);
   };
@@ -133,7 +133,7 @@ export const FlowPilotView = ({ tasks = [], onAddTask, onAddToast }) => {
           <Cpu size={26} />
         </div>
         <h1 style={{ fontSize: '1.75rem', fontWeight: 800, letterSpacing: '-0.03em', color: 'var(--flow-text-main)', marginBottom: 4 }}>
-          FlowPilot AI
+          KeepWork AI
         </h1>
         <p style={{ fontSize: '0.88rem', color: 'var(--flow-text-subtle)' }}>
           Workspace Copilot & Autonomous Engineering Agents
@@ -149,7 +149,7 @@ export const FlowPilotView = ({ tasks = [], onAddTask, onAddToast }) => {
             onClick={() => setMode('ask')}
           >
             <Sparkles size={14} color="var(--flow-primary)" />
-            <span>Ask FlowPilot</span>
+            <span>Ask KeepWork AI</span>
           </button>
           <button
             className={`tab-btn ${mode === 'agents' ? 'active' : ''}`}
@@ -187,7 +187,7 @@ export const FlowPilotView = ({ tasks = [], onAddTask, onAddToast }) => {
                 resize: 'none',
                 lineHeight: 1.5
               }}
-              placeholder={isListening ? "Mendengarkan suara Anda... (Bicara sekarang)" : "Ask FlowPilot anything about your tasks, velocity, or code..."}
+              placeholder={isListening ? "Mendengarkan suara Anda... (Bicara sekarang)" : "Ask KeepWork AI anything about your tasks, velocity, or code..."}
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
               onKeyDown={(e) => {
@@ -304,7 +304,7 @@ export const FlowPilotView = ({ tasks = [], onAddTask, onAddToast }) => {
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
                 <Cpu size={16} color="var(--flow-primary)" />
                 <span style={{ fontSize: '0.86rem', fontWeight: 700, color: 'var(--flow-text-main)' }}>
-                  FlowPilot Assistant ({selectedModel})
+                  KeepWork AI Assistant ({selectedModel})
                 </span>
               </div>
               <div style={{ fontSize: '0.88rem', lineHeight: 1.6, color: 'var(--flow-text-subtle)', whiteSpace: 'pre-line' }}>
@@ -463,7 +463,7 @@ export const FlowPilotView = ({ tasks = [], onAddTask, onAddToast }) => {
         <div className="modal-backdrop" onClick={() => setShowSkillsModal(false)}>
           <div className="modal-card" style={{ maxWidth: 520 }} onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <span style={{ fontWeight: 700, fontSize: '0.92rem' }}>FlowPilot Productivity Skills</span>
+              <span style={{ fontWeight: 700, fontSize: '0.92rem' }}>KeepWork AI Productivity Skills</span>
               <button className="icon-btn" onClick={() => setShowSkillsModal(false)}>
                 <X size={16} />
               </button>

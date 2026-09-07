@@ -1,30 +1,32 @@
-# ⚡ FlowWork OS
+# ⚡ KeepWork OS
 > **Sistem Operasi Produktivitas All-in-One untuk Mahasiswa, Freelancer, Pejuang Skripsi, dan Kreator Konten.**
 
-![FlowWork Banner](public/og-banner.jpg)
+![KeepWork Banner](public/og-banner.jpg)
 
-FlowWork adalah platform manajemen produktivitas modern yang menggabungkan kemudahan pelacakan tugas (*To-Do List*), fleksibilitas papan Kanban visual, ketepatan *Pomodoro Focus Timer*, pencatatan kilat (*Quick Notes*), serta asisten AI produktivitas terintegrasi (**FlowPilot AI**).
+KeepWork adalah platform manajemen produktivitas modern yang menggabungkan kemudahan pelacakan tugas (*To-Do List*), fleksibilitas papan Kanban visual, ketepatan *Pomodoro Focus Timer*, pencatatan kilat (*Quick Notes*), serta asisten AI produktivitas terintegrasi (**KeepWork AI**).
 
-Dirancang khusus dengan estetika premium, mode gelap & terang harmonis, serta arsitektur **Offline-First (Zero Cloud Leak)** yang menjaga privasi data 100% aman di peramban Anda.
+Dirancang khusus dengan estetika premium, mode gelap & terang harmonis, serta arsitektur **Offline-First (Zero Cloud Leak)** yang menjaga privasi data 100% aman di peramban Anda dengan opsi sinkronisasi cloud PostgreSQL (Supabase).
 
 ---
 
 ## ✨ Fitur Utama
 
-- 📋 **Manajemen Tugas & Proyek**: Dukungan multi-workspace (Kuliah & Studi, Freelance & Klien, Personal Life).
-- 📌 **Papan Kanban Interaktif**: Alur kerja Drag-and-Drop / status kartu fleksibel (To Do, In Progress, Under Review, Done).
+- 📋 **Manajemen Tugas & Proyek**: Dukungan multi-workspace (Kuliah & Studi, Freelance & Klien, Personal Life, Custom Ruang Kerja).
+- 📌 **Papan Kanban Interaktif**: Alur kerja visual fleksibel (To Do, In Progress, Under Review, Done) dengan pelacakan subtask & tags.
 - ⏱️ **Pomodoro Focus Timer**: Pengatur waktu fokus 25 menit dengan preset istirahat pendek & panjang, efek audio, dan metrik streak produktivitas harian.
-- 📝 **Quick Notes & Scratchpad**: Papan catatan cepat untuk ide instan, draf tugas, atau catatan kuliah tanpa hambatan.
-- 🤖 **FlowPilot AI Assistant**: Asisten pintar bawaan untuk merangkum tugas, memecah skripsi/proyek besar menjadi subtask siap eksekusi, serta menyusun jadwal prioritas.
-- 🔐 **Sistem Autentikasi & Akun**: Login, registrasi akun kustom dengan pemilihan peran (*Mahasiswa, Freelancer, UMKM*), akses demo 1-klik, dan mode tamu instan.
+- 📝 **Quick Notes & Smart Scratchpad**: Papan catatan cepat untuk ide instan, draf tugas, atau catatan kuliah tanpa hambatan.
+- 🤖 **KeepWork AI Assistant**: Asisten pintar bawaan untuk merangkum tugas, memecah skripsi/proyek besar menjadi subtask siap eksekusi, serta menyusun jadwal prioritas.
+- 💬 **Channel & Tim Kolaborasi**: Ruang obrolan kanal ala Slack/Discord terintegrasi per ruang kerja.
+- 🔐 **Sistem Autentikasi & Akun**: Login, registrasi akun kustom dengan pemilihan peran (*Mahasiswa, Freelancer, UMKM*), sinkronisasi Supabase Cloud, akses demo 1-klik, dan mode tamu instan.
 - 📱 **Desain Responsif & PWA-Ready**: Tampilan mulus di ponsel pintar, tablet, maupun monitor desktop resolusi tinggi.
-- 🛡️ **Privasi 100% Terjaga**: Menggunakan penyimpanan lokal terenkripsi di browser tanpa risiko kebocoran data ke server pihak ketiga.
+- 🛡️ **Privasi 100% Terjaga**: Menggunakan penyimpanan lokal terenkripsi di browser dengan sinkronisasi opsional ke Supabase Cloud.
 
 ---
 
 ## 🛠️ Tech Stack
 
 - **Frontend Core**: React 18 (Vite)
+- **Database & Auth**: Supabase (PostgreSQL Cloud)
 - **Styling**: Vanilla CSS (Modern Design System, CSS Variables, Glassmorphism, Micro-animations)
 - **Icons**: Lucide React
 - **Visual FX**: Canvas Confetti
@@ -34,10 +36,9 @@ Dirancang khusus dengan estetika premium, mode gelap & terang harmonis, serta ar
 
 ## 🚀 Menjalankan Secara Lokal
 
-1. **Clone repositori**:
+1. **Buka folder project**:
    ```bash
-   git clone https://github.com/kurniaptk-dotcom/flowwork.git
-   cd flowwork
+   cd "D:\Project\Project Aplikasi Kurnia\KeepWork"
    ```
 
 2. **Instal dependensi**:
@@ -59,4 +60,4 @@ Dirancang khusus dengan estetika premium, mode gelap & terang harmonis, serta ar
 ---
 
 ## 📄 Lisensi
-Hak Cipta © 2026 FlowWork. Dibuat untuk memberdayakan mahasiswa dan profesional mandiri di seluruh Indonesia.
+Hak Cipta © 2026 KeepWork. Dibuat untuk memberdayakan mahasiswa dan profesional mandiri di seluruh Indonesia.

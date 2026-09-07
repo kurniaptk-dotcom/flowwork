@@ -43,7 +43,7 @@ export const FlowMobileBottomNav = ({
     },
     {
       id: 'brain',
-      label: 'FlowPilot',
+      label: 'KeepWork AI',
       icon: Sparkles,
       isCenter: true
     },
@@ -71,12 +71,12 @@ export const FlowMobileBottomNav = ({
               type="button"
               className={`mobile-nav-item mobile-nav-center ${isActive ? 'active' : ''}`}
               onClick={() => setActiveModule(tab.id)}
-              title="Buka FlowPilot AI"
+              title="Buka KeepWork AI"
             >
               <div className="mobile-nav-center-icon">
                 <Icon size={20} />
               </div>
-              <span className="mobile-nav-label">FlowPilot</span>
+              <span className="mobile-nav-label">KeepWork AI</span>
             </button>
           );
         }
