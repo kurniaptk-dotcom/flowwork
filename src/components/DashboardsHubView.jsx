@@ -45,7 +45,7 @@ export const DashboardsHubView = ({
     {
       id: 'project',
       title: 'Target & Progress',
-      subtitle: 'Pantau target, burndown, & progres',
+      subtitle: 'Pantau target, kurva selesai, & progres',
       icon: Briefcase,
       color: '#00a884',
       badge: 'Progres'
@@ -70,7 +70,7 @@ export const DashboardsHubView = ({
     if (selectedDashboard === 'project') {
       return {
         title: 'Target, Metrik & Progress Tracker',
-        subtitle: 'Diagnosis pencapaian target, kurva penyelesaian tugas, velocity mingguan, dan estimasi selesai.'
+        subtitle: 'Diagnosis pencapaian target, kurva penyelesaian tugas, kemajuan mingguan, dan estimasi selesai.'
       };
     }
     return {

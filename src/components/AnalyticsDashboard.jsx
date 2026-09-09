@@ -170,14 +170,14 @@ export const AnalyticsDashboard = ({
   if (completionRate < 30 && totalTasks > 4) healthScore -= 10;
   healthScore = Math.max(65, Math.min(98, healthScore));
 
-  let healthStatus = 'Sangat Sehat • On Track';
+  let healthStatus = 'Semangat Penuh — Lancar Jaya!';
   let healthBadgeColor = 'var(--flow-accent-emerald)';
   if (healthScore < 80) {
-    healthStatus = 'Perlu Perhatian • Moderat';
+    healthStatus = 'Perlu Fokus — Agak Padat';
     healthBadgeColor = 'var(--flow-accent-amber)';
   }
   if (healthScore < 70) {
-    healthStatus = 'Kritis • Risiko Bottleneck';
+    healthStatus = 'Kritis — Butuh Aksi Segera!';
     healthBadgeColor = 'var(--flow-accent-rose)';
   }
 
@@ -232,7 +232,7 @@ export const AnalyticsDashboard = ({
             </div>
             <div>
               <div style={{ fontWeight: 700, fontSize: '0.88rem', color: 'var(--flow-text-main)' }}>
-                Simple Dashboard Active • Mode Eksekusi Tugas
+                Mode Eksekusi Tugas — Fokus & Bersih
               </div>
               <div style={{ fontSize: '0.74rem', color: 'var(--flow-text-muted)' }}>
                 Tampilan praktis untuk mengecek progres to-do, subtask, dan prioritas tanpa distraksi grafik kompleks.
@@ -478,7 +478,7 @@ export const AnalyticsDashboard = ({
                   📋 Checklist Subtask Aktif
                 </h4>
                 <span style={{ fontSize: '0.72rem', color: 'var(--flow-text-muted)' }}>
-                  {activeSubtaskList.length} item checklist tersisa di sprint
+                  {activeSubtaskList.length} item checklist yang belum selesai
                 </span>
               </div>
 
@@ -550,12 +550,12 @@ export const AnalyticsDashboard = ({
   };
 
   /* ==========================================================================
-     VIEW 2: AI TEAM CENTER (Team Activity, Workload & AI Copilot Intelligence)
+     VIEW 2: AI KOLABORASI (Aktivitas Belajar Bareng & Asisten AI)
      ========================================================================== */
   const renderAICenterDashboard = () => {
     return (
       <div className="flow-analytics-wrapper" style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-        {/* FlowPilot AI Team Center Intelligence Card */}
+        {/* FlowPilot KeepWork AI Asisten Belajar Intelligence Card */}
         <div
           style={{
             padding: '20px 22px',
@@ -587,20 +587,20 @@ export const AnalyticsDashboard = ({
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   <span className="flow-badge flow-badge-cyan" style={{ fontSize: '0.72rem', padding: '2px 8px' }}>
-                    <Bot size={12} style={{ marginRight: 4 }} /> KeepWork AI Team Intelligence
+                    <Bot size={12} style={{ marginRight: 4 }} /> Asisten Pribadi KeepWork AI
                   </span>
                   <span style={{ fontSize: '0.74rem', color: 'var(--flow-text-muted)' }}>
-                    Kesehatan Kolaborasi: 94/100 (Optimal)
+                    Produktivitas Bareng: Optimal 🤝
                   </span>
                 </div>
 
                 <h3 style={{ fontSize: '1.08rem', fontWeight: 800, color: 'var(--flow-text-main)', margin: '6px 0 4px' }}>
-                  AI Team Center • Rekomendasi & Analisis Kapasitas Kolaborasi
+                  KeepWork AI Asisten Belajar • Rekomendasi & Analisis Kapasitas Kolaborasi
                 </h3>
                 <p style={{ fontSize: '0.84rem', color: 'var(--flow-text-subtle)', margin: 0, maxWidth: 650, lineHeight: 1.45 }}>
                   {aiRebalanced
-                    ? '✨ Beban kerja tim telah diselaraskan secara otomatis oleh KeepWork AI. Kapasitas tugas Review & QA dialokasikan secara proporsional kepada Alex Rivera dan Kurnia untuk menjamin rilis tepat waktu.'
-                    : 'KeepWork AI mendeteksi 4 kolaborator aktif dengan velocity stabil. Rekomendasi AI: Sarah Chen telah menyelesaikan 100% tugasnya; siap menerima limpahan review dari Dimas Pratama guna mempercepat pengujian akhir.'}
+                    ? '✨ KeepWork AI telah menyesuaikan pembagian tugas belajar. Tugas Revisi & Review dibagi merata kepada Alex Rivera dan Kurnia agar semua deadline terpenuhi.'
+                    : 'KeepWork AI mendeteksi 4 teman belajar aktif dengan semangat tinggi. Saran: Sarah Chen telah menyelesaikan semua tugasnya dan siap bantu review tugas Dimas Pratama.'}
                 </p>
               </div>
             </div>
@@ -611,12 +611,12 @@ export const AnalyticsDashboard = ({
                 className="flow-pilot-trigger"
                 onClick={() => {
                   setAiRebalanced(true);
-                  if (onShowToast) onShowToast('KeepWork AI: Beban kerja tim telah berhasil dioptimalkan!', 'success');
+                  if (onShowToast) onShowToast('KeepWork AI: Pembagian tugas teman belajar telah diseimbangkan!', 'success');
                 }}
-                title="Otomatis seimbangkan alokasi tugas tim"
+                title="AI bantu seimbangkan tugas teman belajar"
               >
                 <Sparkles size={14} />
-                <span>{aiRebalanced ? 'Beban Terseimbang' : 'Auto-Balance Tim'}</span>
+                <span>{aiRebalanced ? 'Tugas Terbagi Rata' : 'Saran Bagi Tugas AI'}</span>
               </button>
             </div>
           </div>
@@ -626,7 +626,7 @@ export const AnalyticsDashboard = ({
         <div className="flow-kpi-grid">
           <div className="flow-kpi-card">
             <div className="flow-kpi-header">
-              <span className="flow-kpi-title">Kontributor Aktif</span>
+              <span className="flow-kpi-title">Teman Belajar Aktif</span>
               <div className="flow-kpi-icon-wrap" style={{ color: 'var(--flow-primary)', backgroundColor: 'var(--flow-primary-light)' }}>
                 <Users size={16} />
               </div>
@@ -634,13 +634,13 @@ export const AnalyticsDashboard = ({
             <div className="flow-kpi-value">{effectiveMembers.length} Kolaborator</div>
             <div className="flow-kpi-footer">
               <span style={{ color: 'var(--flow-accent-emerald)', fontWeight: 600 }}>100% Aktif</span>
-              <span style={{ color: 'var(--flow-text-muted)' }}>semua berkontribusi di sprint</span>
+              <span style={{ color: 'var(--flow-text-muted)' }}>semua aktif berkolaborasi bareng</span>
             </div>
           </div>
 
           <div className="flow-kpi-card">
             <div className="flow-kpi-header">
-              <span className="flow-kpi-title">Velocity Kolaborasi</span>
+              <span className="flow-kpi-title">Semangat Belajar Bareng</span>
               <div className="flow-kpi-icon-wrap" style={{ color: 'var(--flow-accent-emerald)', backgroundColor: 'rgba(16, 185, 129, 0.12)' }}>
                 <Zap size={16} />
               </div>
@@ -648,27 +648,27 @@ export const AnalyticsDashboard = ({
             <div className="flow-kpi-value">18 Pts</div>
             <div className="flow-kpi-footer">
               <span style={{ color: 'var(--flow-accent-emerald)', fontWeight: 600 }}>+15% Produktivitas</span>
-              <span style={{ color: 'var(--flow-text-muted)' }}>konsisten di sprint Q3</span>
+              <span style={{ color: 'var(--flow-text-muted)' }}>konsisten pekan ini</span>
             </div>
           </div>
 
           <div className="flow-kpi-card">
             <div className="flow-kpi-header">
-              <span className="flow-kpi-title">Waktu Siklus Rata-rata</span>
+              <span className="flow-kpi-title">Rata-rata Waktu Selesai</span>
               <div className="flow-kpi-icon-wrap" style={{ color: 'var(--flow-accent-cyan)', backgroundColor: 'rgba(6, 182, 212, 0.12)' }}>
                 <Clock size={16} />
               </div>
             </div>
             <div className="flow-kpi-value">2.3 Hari</div>
             <div className="flow-kpi-footer">
-              <span style={{ color: 'var(--flow-accent-cyan)', fontWeight: 600 }}>Lead Time Cepat</span>
-              <span style={{ color: 'var(--flow-text-muted)' }}>dari To Do ke Selesai</span>
+              <span style={{ color: 'var(--flow-accent-cyan)', fontWeight: 600 }}>Diselesaikan Cepat</span>
+              <span style={{ color: 'var(--flow-text-muted)' }}>dari mulai sampai selesai</span>
             </div>
           </div>
 
           <div className="flow-kpi-card">
             <div className="flow-kpi-header">
-              <span className="flow-kpi-title">Akurasi Estimasi Waktu</span>
+              <span className="flow-kpi-title">Ketepatan Target Tugas</span>
               <div className="flow-kpi-icon-wrap" style={{ color: 'var(--flow-accent-amber)', backgroundColor: 'rgba(245, 158, 11, 0.12)' }}>
                 <Target size={16} />
               </div>
@@ -676,7 +676,7 @@ export const AnalyticsDashboard = ({
             <div className="flow-kpi-value">92%</div>
             <div className="flow-kpi-footer">
               <span style={{ color: 'var(--flow-accent-emerald)', fontWeight: 600 }}>On Schedule</span>
-              <span style={{ color: 'var(--flow-text-muted)' }}>deviasi jam kerja minimal</span>
+              <span style={{ color: 'var(--flow-text-muted)' }}>hampir semua selesai tepat waktu</span>
             </div>
           </div>
         </div>
@@ -687,10 +687,10 @@ export const AnalyticsDashboard = ({
           <div className="flow-chart-panel" style={{ flex: 1 }}>
             <div style={{ marginBottom: 14 }}>
               <h4 style={{ fontSize: '0.94rem', fontWeight: 700, color: 'var(--flow-text-main)', margin: 0 }}>
-                👥 Radar Beban Kerja & Kapasitas Tim
+                👥 Distribusi Tugas Teman Belajar
               </h4>
               <span style={{ fontSize: '0.74rem', color: 'var(--flow-text-muted)' }}>
-                Monitoring kapasitas real-time per anggota tim untuk menghindari kejenuhan (burnout)
+                Pantau tugas masing-masing teman belajar agar tidak ada yang kewalahan
               </span>
             </div>
 
@@ -787,10 +787,10 @@ export const AnalyticsDashboard = ({
           <div className="flow-chart-panel" style={{ flex: 1 }}>
             <div style={{ marginBottom: 14 }}>
               <h4 style={{ fontSize: '0.94rem', fontWeight: 700, color: 'var(--flow-text-main)', margin: 0 }}>
-                ⚡ Aktivitas Kolaborasi Tim Terkini
+                ⚡ Aktivitas Teman Belajar Terkini
               </h4>
               <span style={{ fontSize: '0.74rem', color: 'var(--flow-text-muted)' }}>
-                Log interaktif pergerakan tiket dan pencapaian tim real-time
+                Catatan aktivitas dan pencapaian belajar bersama terkini
               </span>
             </div>
 
@@ -811,10 +811,10 @@ export const AnalyticsDashboard = ({
                 </div>
                 <div style={{ fontSize: '0.8rem', flex: 1 }}>
                   <div style={{ color: 'var(--flow-text-main)', fontWeight: 600 }}>
-                    Dimas Pratama memindahkan tugas ke Review & QA
+                    Dimas Pratama memindahkan tugas ke tahap Revisi
                   </div>
                   <div style={{ fontSize: '0.72rem', color: 'var(--flow-text-muted)', marginTop: 2 }}>
-                    Implementasi Autentikasi JWT • 15 menit lalu
+                    Laporan Praktikum Basis Data — 15 menit lalu
                   </div>
                 </div>
               </div>
@@ -835,10 +835,10 @@ export const AnalyticsDashboard = ({
                 </div>
                 <div style={{ fontSize: '0.8rem', flex: 1 }}>
                   <div style={{ color: 'var(--flow-text-main)', fontWeight: 600 }}>
-                    Sarah Chen menyelesaikan checklist subtask
+                    Sarah Chen menyelesaikan semua checklist tugas
                   </div>
                   <div style={{ fontSize: '0.72rem', color: 'var(--flow-text-muted)', marginTop: 2 }}>
-                    Desain UI Onboarding Pengguna • 1 jam lalu
+                    Materi Presentasi Seminar Hasil — 1 jam lalu
                   </div>
                 </div>
               </div>
@@ -859,10 +859,10 @@ export const AnalyticsDashboard = ({
                 </div>
                 <div style={{ fontSize: '0.8rem', flex: 1 }}>
                   <div style={{ color: 'var(--flow-text-main)', fontWeight: 600 }}>
-                    KeepWork AI mendeteksi target pekan ini terpenuhi 67%
+                    KeepWork AI: target belajar pekan ini terpenuhi 67%
                   </div>
                   <div style={{ fontSize: '0.72rem', color: 'var(--flow-text-muted)', marginTop: 2 }}>
-                    Target Tugas On Track • 2 jam lalu
+                    Progres Tugas Pekan Ini — 2 jam lalu
                   </div>
                 </div>
               </div>
@@ -883,10 +883,10 @@ export const AnalyticsDashboard = ({
                 </div>
                 <div style={{ fontSize: '0.8rem', flex: 1 }}>
                   <div style={{ color: 'var(--flow-text-main)', fontWeight: 600 }}>
-                    Alex Rivera memperbarui estimasi tugas
+                    Alex Rivera memperbarui jadwal penyelesaian tugas
                   </div>
                   <div style={{ fontSize: '0.72rem', color: 'var(--flow-text-muted)', marginTop: 2 }}>
-                    Setup Database PostgreSQL & Redis • 4 jam lalu
+                    Analisis Data Skripsi & Pengolahan SPSS — 4 jam lalu
                   </div>
                 </div>
               </div>
@@ -936,17 +936,17 @@ export const AnalyticsDashboard = ({
                     {healthStatus}
                   </span>
                   <span style={{ fontSize: '0.74rem', color: 'var(--flow-text-muted)' }}>
-                    • Ringkasan Sprint Aktif
+                    • Ringkasan Tugas Aktif
                   </span>
                 </div>
 
                 <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--flow-text-main)', margin: '6px 0 4px', letterSpacing: '-0.01em' }}>
-                  KeepWork Diagnostik & Analitik Produktivitas
+                  KeepWork Ringkasan Produktivitas & Progres Kamu
                 </h3>
                 <p style={{ fontSize: '0.84rem', color: 'var(--flow-text-subtle)', margin: 0, maxWidth: 650, lineHeight: 1.45 }}>
                   {completedTasks >= 2
                     ? `Aktivitas berjalan efisien dengan ${completedTasks} tugas selesai (${completionRate}%). Terdapat ${inProgressTasks} tugas sedang dikerjakan dan ${reviewTasks} tugas review.`
-                    : `Sprint aktif dengan ${todoTasks} tugas antrian dan ${urgentTasks} tugas mendesak. Klik pada kartu metrik di bawah untuk memfilter daftar tugas secara instan.`}
+                    : `Sedang berjalan dengan ${todoTasks} tugas antrian dan ${urgentTasks} tugas mendesak. Klik pada kartu metrik di bawah untuk memfilter daftar tugas secara instan.`}
                 </p>
               </div>
             </div>
@@ -1472,14 +1472,14 @@ export const AnalyticsDashboard = ({
           )}
         </div>
 
-        {/* 4. Sprint Burndown Curve & Pipeline Breakdown */}
+        {/* 4. Kurva Penyelesaian Tugas & Pipeline Breakdown */}
         <div className="flow-charts-split">
-          {/* Sprint Burndown Curve */}
+          {/* Kurva Penyelesaian Tugas */}
           <div className="flow-chart-panel" style={{ background: 'var(--flow-bg-surface)', border: '1px solid var(--flow-border-subtle)', borderRadius: 14, padding: '20px', boxShadow: 'var(--flow-shadow-sm)' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
               <div>
                 <h4 style={{ fontSize: '0.94rem', fontWeight: 800, color: 'var(--flow-text-main)', margin: 0 }}>
-                  Target Burndown Mingguan
+                  Target Progres Mingguan
                 </h4>
                 <span style={{ fontSize: '0.74rem', color: 'var(--flow-text-muted)' }}>
                   Target Ideal vs Sisa Beban Aktual Pekan Ini
@@ -1653,14 +1653,14 @@ export const AnalyticsDashboard = ({
             </div>
           </div>
 
-          {/* Team Workload & Contribution (Clickable Member Filter) */}
+          {/* Distribusi Tugas & Pencapaian Teman Belajar (Klik untuk Filter) */}
           <div className="flow-chart-panel" style={{ background: 'var(--flow-bg-surface)', border: '1px solid var(--flow-border-subtle)', borderRadius: 14, padding: '20px', boxShadow: 'var(--flow-shadow-sm)' }}>
             <div style={{ marginBottom: 14 }}>
               <h4 style={{ fontSize: '0.94rem', fontWeight: 800, color: 'var(--flow-text-main)', margin: 0 }}>
-                Alokasi & Kontribusi Anggota Tim
+                Distribusi Tugas Teman Belajar
               </h4>
               <span style={{ fontSize: '0.74rem', color: 'var(--flow-text-muted)' }}>
-                💡 Klik anggota tim untuk melihat tugas yang ditugaskan kepadanya
+                💡 Klik teman belajar untuk melihat tugasnya
               </span>
             </div>
 
