@@ -176,7 +176,7 @@ export const AnalyticsDashboard = ({
 
         {/* 4 Quick Metric Cards */}
         <div className="flow-kpi-grid">
-          <div className="flow-kpi-card" style={{ borderLeft: '4px solid var(--flow-accent-rose)' }}>
+          <div className="flow-kpi-card" style={{ borderTop: '2px solid var(--flow-accent-rose)' }}>
             <div className="flow-kpi-header">
               <span className="flow-kpi-title">Prioritas Tinggi & Mendesak</span>
               <div className="flow-kpi-icon-wrap" style={{ color: 'var(--flow-accent-rose)', backgroundColor: 'rgba(244, 63, 94, 0.12)' }}>
@@ -194,7 +194,7 @@ export const AnalyticsDashboard = ({
             </div>
           </div>
 
-          <div className="flow-kpi-card" style={{ borderLeft: '4px solid var(--flow-accent-cyan)' }}>
+          <div className="flow-kpi-card" style={{ borderTop: '2px solid var(--flow-accent-cyan)' }}>
             <div className="flow-kpi-header">
               <span className="flow-kpi-title">Sedang Dikerjakan</span>
               <div className="flow-kpi-icon-wrap" style={{ color: 'var(--flow-accent-cyan)', backgroundColor: 'rgba(6, 182, 212, 0.12)' }}>
@@ -208,7 +208,7 @@ export const AnalyticsDashboard = ({
             </div>
           </div>
 
-          <div className="flow-kpi-card" style={{ borderLeft: '4px solid var(--flow-primary)' }}>
+          <div className="flow-kpi-card" style={{ borderTop: '2px solid var(--flow-primary)' }}>
             <div className="flow-kpi-header">
               <span className="flow-kpi-title">Antrian Tugas (To Do)</span>
               <div className="flow-kpi-icon-wrap" style={{ color: 'var(--flow-primary)', backgroundColor: 'var(--flow-primary-light)' }}>
@@ -222,7 +222,7 @@ export const AnalyticsDashboard = ({
             </div>
           </div>
 
-          <div className="flow-kpi-card" style={{ borderLeft: '4px solid var(--flow-accent-emerald)' }}>
+          <div className="flow-kpi-card" style={{ borderTop: '2px solid var(--flow-accent-emerald)' }}>
             <div className="flow-kpi-header">
               <span className="flow-kpi-title">Selesai (Completed)</span>
               <div className="flow-kpi-icon-wrap" style={{ color: 'var(--flow-accent-emerald)', backgroundColor: 'rgba(16, 185, 129, 0.12)' }}>

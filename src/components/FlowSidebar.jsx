@@ -155,7 +155,7 @@ export const FlowSidebar = ({
         {/* Workspace Navigation Group */}
         <div className="flow-nav-group">
           {(!isCollapsed || isMobileOpen) && (
-            <div className="flow-nav-heading" style={{ fontSize: '0.68rem', fontWeight: 700, letterSpacing: '0.06em', color: 'var(--flow-text-muted)', marginBottom: 6 }}>
+            <div className="flow-nav-heading" style={{ fontSize: '0.64rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--flow-text-muted)', marginBottom: 4, padding: '4px 6px' }}>
               RUANG KERJA
             </div>
           )}
@@ -182,7 +182,7 @@ export const FlowSidebar = ({
         {/* Personal Productivity Navigation Group */}
         <div className="flow-nav-group" style={{ marginTop: 12 }}>
           {(!isCollapsed || isMobileOpen) && (
-            <div className="flow-nav-heading" style={{ fontSize: '0.68rem', fontWeight: 700, letterSpacing: '0.06em', color: 'var(--flow-text-muted)', marginBottom: 6 }}>
+            <div className="flow-nav-heading" style={{ fontSize: '0.64rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--flow-text-muted)', marginBottom: 4, padding: '4px 6px' }}>
               PRODUKTIVITAS PRIBADI
             </div>
           )}

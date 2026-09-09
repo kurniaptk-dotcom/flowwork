@@ -2,31 +2,31 @@
 
 :root,
 [data-theme='light'] {
-  /* Brand Accents */
+  /* Brand Accents (Linear / Raycast Modern Palette) */
   --flow-primary: #6366f1;
   --flow-primary-hover: #4f46e5;
-  --flow-primary-light: rgba(99, 102, 241, 0.12);
+  --flow-primary-light: rgba(99, 102, 241, 0.08);
   --flow-accent-cyan: #06b6d4;
   --flow-accent-emerald: #10b981;
   --flow-accent-amber: #f59e0b;
   --flow-accent-rose: #f43f5e;
   --flow-pilot-gradient: linear-gradient(135deg, #6366f1 0%, #06b6d4 50%, #10b981 100%);
-  --flow-card-gradient: linear-gradient(180deg, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0.2) 100%);
+  --flow-card-gradient: linear-gradient(180deg, rgba(255, 255, 255, 0.85) 0%, rgba(255, 255, 255, 0.45) 100%);
 
-  /* Light Theme Surfaces & Text */
-  --flow-bg-canvas: #f8fafc;
-  --flow-bg-base: #f8fafc;
+  /* Light Theme Surfaces & Text (Minimalist Pure Canvas) */
+  --flow-bg-canvas: #fbfcfd;
+  --flow-bg-base: #fbfcfd;
   --flow-bg-surface: #ffffff;
-  --flow-bg-elevated: #f1f5f9;
+  --flow-bg-elevated: #f4f6f8;
   --flow-sidebar-bg: #ffffff;
-  --flow-border-subtle: #e2e8f0;
-  --flow-border-hover: #cbd5e1;
-  --flow-text-main: #0f172a;
-  --flow-text-subtle: #475569;
-  --flow-text-muted: #94a3b8;
-  --flow-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --flow-shadow-md: 0 4px 14px 0 rgba(0, 0, 0, 0.06);
-  --flow-shadow-lg: 0 10px 30px -3px rgba(0, 0, 0, 0.08);
+  --flow-border-subtle: #eaedf1;
+  --flow-border-hover: #d2d9e0;
+  --flow-text-main: #0c121e;
+  --flow-text-subtle: #4b5563;
+  --flow-text-muted: #8c9ba5;
+  --flow-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.03);
+  --flow-shadow-md: 0 4px 12px -2px rgba(0, 0, 0, 0.05);
+  --flow-shadow-lg: 0 12px 28px -4px rgba(0, 0, 0, 0.07);
 
   /* Dimensions */
   --flow-sidebar-width: 250px;
@@ -34,20 +34,20 @@
 }
 
 [data-theme='dark'] {
-  /* Dark Theme Surfaces & Text (Deep Zinc & Obsidian) */
+  /* Dark Theme Surfaces & Text (Deep Obsidian & Minimal Zinc) */
   --flow-bg-canvas: #090d16;
   --flow-bg-base: #090d16;
-  --flow-bg-surface: #0e1526;
-  --flow-bg-elevated: #162038;
-  --flow-sidebar-bg: #0b1120;
-  --flow-border-subtle: rgba(255, 255, 255, 0.08);
-  --flow-border-hover: rgba(255, 255, 255, 0.16);
+  --flow-bg-surface: #0e1422;
+  --flow-bg-elevated: #141b2d;
+  --flow-sidebar-bg: #0b101d;
+  --flow-border-subtle: rgba(255, 255, 255, 0.07);
+  --flow-border-hover: rgba(255, 255, 255, 0.14);
   --flow-text-main: #f8fafc;
   --flow-text-subtle: #94a3b8;
   --flow-text-muted: #64748b;
   --flow-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.4);
-  --flow-shadow-md: 0 4px 20px -2px rgba(0, 0, 0, 0.5);
-  --flow-shadow-lg: 0 12px 36px -4px rgba(0, 0, 0, 0.7);
+  --flow-shadow-md: 0 4px 18px -2px rgba(0, 0, 0, 0.5);
+  --flow-shadow-lg: 0 12px 32px -4px rgba(0, 0, 0, 0.65);
   --flow-card-gradient: linear-gradient(180deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0) 100%);
 }
 
@@ -153,10 +153,10 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 7px 10px;
-  border-radius: 8px;
+  padding: 6px 10px;
+  border-radius: 6px;
   color: var(--flow-text-subtle);
-  font-size: 0.84rem;
+  font-size: 0.82rem;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.12s ease;
@@ -173,7 +173,7 @@
   background-color: var(--flow-primary-light);
   color: var(--flow-primary);
   font-weight: 600;
-  border-color: rgba(99, 102, 241, 0.25);
+  border-color: rgba(99, 102, 241, 0.18);
 }
 
 .flow-sidebar-footer {
@@ -219,17 +219,17 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  background-color: var(--flow-bg-base);
+  background-color: var(--flow-bg-elevated);
   border: 1px solid var(--flow-border-subtle);
-  border-radius: 10px;
-  padding: 6px 14px;
+  border-radius: 20px;
+  padding: 5px 14px;
   width: 380px;
   transition: all 0.15s ease;
 }
 
 .flow-command-bar:focus-within {
   border-color: var(--flow-primary);
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
   background-color: var(--flow-bg-surface);
 }
 
@@ -3108,4 +3108,58 @@
   transform: translateY(-2px);
   border-color: var(--flow-border-hover) !important;
   box-shadow: var(--flow-shadow-md) !important;
+}
+
+
+/* Minimalist Scrollbar & Clean Tokens */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--flow-border-hover);
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--flow-text-muted);
+}
+
+/* Minimalist Card Refinements */
+.flow-clean-card {
+  background: var(--flow-bg-surface);
+  border: 1px solid var(--flow-border-subtle);
+  border-radius: 12px;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.flow-clean-card:hover {
+  border-color: var(--flow-border-hover);
+}
+
+/* Minimalist Pill Button */
+.flow-pill-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  border: 1px solid var(--flow-border-subtle);
+  background: var(--flow-bg-surface);
+  color: var(--flow-text-subtle);
+  cursor: pointer;
+  transition: all 0.12s ease;
+}
+.flow-pill-btn:hover {
+  color: var(--flow-text-main);
+  border-color: var(--flow-border-hover);
+  background: var(--flow-bg-elevated);
+}
+.flow-pill-btn.active {
+  background: var(--flow-primary-light);
+  color: var(--flow-primary);
+  border-color: rgba(99, 102, 241, 0.2);
 }

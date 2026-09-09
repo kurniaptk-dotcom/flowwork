@@ -97,9 +97,16 @@ export const HabitTrackerView = ({
     return habits.filter((h) => {
       const matchCat = selectedCategory === 'Semua' || h.category === selectedCategory;
       const matchTime = selectedTimeFilter === 'all' || h.timeOfDay === selectedTimeFilter;
-      return matchCat && matchTime;
+      const isTodayDone = !!h.history?.[todayStr];
+      const matchStatus =
+        statusFilter === 'all'
+          ? true
+          : statusFilter === 'completed'
+          ? isTodayDone
+          : !isTodayDone;
+      return matchCat && matchTime && matchStatus;
     });
-  }, [habits, selectedCategory, selectedTimeFilter]);
+  }, [habits, selectedCategory, selectedTimeFilter, statusFilter, todayStr]);
 
   // Completion Stats for Today
   const todayStats = useMemo(() => {
@@ -175,6 +182,29 @@ export const HabitTrackerView = ({
         }
       }
     }
+  };
+
+  const handleQuickAdd = (e) => {
+    e?.preventDefault();
+    if (!quickAddTitle.trim()) return;
+
+    const newHabit = {
+      id: 'habit-' + Date.now(),
+      title: quickAddTitle.trim(),
+      category: selectedCategory === 'Semua' ? 'Belajar & Skripsi' : selectedCategory,
+      emoji: '🎯',
+      timeOfDay: selectedTimeFilter === 'all' ? 'anytime' : selectedTimeFilter,
+      goal: '1x sehari',
+      color: '#6366f1',
+      streak: 0,
+      bestStreak: 0,
+      history: {},
+      createdAt: new Date().toISOString()
+    };
+
+    onUpdateHabits([newHabit, ...habits]);
+    setQuickAddTitle('');
+    if (onAddToast) onAddToast(`Kebiasaan "${newHabit.title}" berhasil ditambahkan!`, 'success');
   };
 
   const handleOpenAdd = () => {
@@ -434,7 +464,7 @@ export const HabitTrackerView = ({
         </div>
       </div>
 
-      {/* Filter Chips Bar */}
+      {/* Filter Chips & Status Bar */}
       <div
         style={{
           display: 'flex',
@@ -442,23 +472,23 @@ export const HabitTrackerView = ({
           justifyContent: 'space-between',
           flexWrap: 'wrap',
           gap: 12,
-          marginBottom: 20
+          marginBottom: 18
         }}
       >
         {/* Category Pills */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, overflowX: 'auto', paddingBottom: 4 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, overflowX: 'auto', paddingBottom: 2 }}>
           {HABIT_CATEGORIES.map((cat) => (
             <button
               key={cat}
               onClick={() => setSelectedCategory(cat)}
-              className="tab-btn"
+              className="flow-pill-btn"
               style={{
-                fontSize: '0.82rem',
-                padding: '6px 14px',
-                borderRadius: 8,
-                background: selectedCategory === cat ? 'var(--flow-primary)' : 'var(--flow-bg-elevated)',
-                color: selectedCategory === cat ? '#ffffff' : 'var(--flow-text-main)',
-                border: selectedCategory === cat ? '1px solid var(--flow-primary)' : '1px solid var(--flow-border-subtle)',
+                fontSize: '0.78rem',
+                padding: '5px 12px',
+                borderRadius: 20,
+                background: selectedCategory === cat ? 'var(--flow-primary)' : 'var(--flow-bg-surface)',
+                color: selectedCategory === cat ? '#ffffff' : 'var(--flow-text-subtle)',
+                borderColor: selectedCategory === cat ? 'var(--flow-primary)' : 'var(--flow-border-subtle)',
                 fontWeight: selectedCategory === cat ? 700 : 500,
                 cursor: 'pointer'
               }}
@@ -468,28 +498,69 @@ export const HabitTrackerView = ({
           ))}
         </div>
 
-        {/* Time Filter Selector */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <Clock size={14} color="var(--flow-text-muted)" />
-          <select
-            value={selectedTimeFilter}
-            onChange={(e) => setSelectedTimeFilter(e.target.value)}
+        {/* Right Controls: Status Filter & Time */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+          {/* Status Segmented Pill */}
+          <div
             style={{
-              fontSize: '0.82rem',
-              padding: '6px 10px',
+              display: 'inline-flex',
+              padding: 3,
               borderRadius: 8,
-              border: '1px solid var(--flow-border-subtle)',
-              background: 'var(--flow-bg-surface)',
-              color: 'var(--flow-text-main)',
-              outline: 'none'
+              background: 'var(--flow-bg-elevated)',
+              border: '1px solid var(--flow-border-subtle)'
             }}
           >
-            <option value="all">Semua Waktu</option>
-            <option value="morning">Pagi Hari</option>
-            <option value="afternoon">Siang Hari</option>
-            <option value="evening">Malam Hari</option>
-            <option value="anytime">Fleksibel</option>
-          </select>
+            {[
+              { id: 'all', label: 'Semua' },
+              { id: 'pending', label: '⚡ Belum Selesai' },
+              { id: 'completed', label: '✓ Sudah Selesai' }
+            ].map((st) => (
+              <button
+                key={st.id}
+                type="button"
+                onClick={() => setStatusFilter(st.id)}
+                style={{
+                  border: 'none',
+                  background: statusFilter === st.id ? 'var(--flow-bg-surface)' : 'transparent',
+                  color: statusFilter === st.id ? 'var(--flow-text-main)' : 'var(--flow-text-muted)',
+                  fontWeight: statusFilter === st.id ? 700 : 500,
+                  fontSize: '0.74rem',
+                  padding: '4px 10px',
+                  borderRadius: 6,
+                  cursor: 'pointer',
+                  boxShadow: statusFilter === st.id ? 'var(--flow-shadow-sm)' : 'none',
+                  transition: 'all 0.12s ease'
+                }}
+              >
+                {st.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Time Filter Selector */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <Clock size={13} color="var(--flow-text-muted)" />
+            <select
+              value={selectedTimeFilter}
+              onChange={(e) => setSelectedTimeFilter(e.target.value)}
+              style={{
+                fontSize: '0.78rem',
+                padding: '4px 8px',
+                borderRadius: 6,
+                border: '1px solid var(--flow-border-subtle)',
+                background: 'var(--flow-bg-surface)',
+                color: 'var(--flow-text-main)',
+                outline: 'none',
+                cursor: 'pointer'
+              }}
+            >
+              <option value="all">Semua Waktu</option>
+              <option value="morning">Pagi Hari</option>
+              <option value="afternoon">Siang Hari</option>
+              <option value="evening">Malam Hari</option>
+              <option value="anytime">Fleksibel</option>
+            </select>
+          </div>
         </div>
       </div>
 
@@ -503,6 +574,48 @@ export const HabitTrackerView = ({
           overflowX: 'auto'
         }}
       >
+        {/* Inline Quick Add Bar */}
+        <form
+          onSubmit={handleQuickAdd}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 10,
+            padding: '10px 18px',
+            background: 'var(--flow-bg-elevated)',
+            borderBottom: '1px solid var(--flow-border-subtle)'
+          }}
+        >
+          <Plus size={15} color="var(--flow-primary)" />
+          <input
+            type="text"
+            placeholder="Tambah kebiasaan cepat... (contoh: Membaca Buku 15 Menit, Minum Air 2 Liter) lalu tekan Enter"
+            value={quickAddTitle}
+            onChange={(e) => setQuickAddTitle(e.target.value)}
+            style={{
+              flex: 1,
+              border: 'none',
+              background: 'transparent',
+              outline: 'none',
+              fontSize: '0.82rem',
+              color: 'var(--flow-text-main)'
+            }}
+          />
+          {quickAddTitle.trim() && (
+            <button
+              type="submit"
+              className="flow-pill-btn active"
+              style={{
+                padding: '3px 12px',
+                fontSize: '0.74rem',
+                fontWeight: 700
+              }}
+            >
+              Simpan
+            </button>
+          )}
+        </form>
+
         {/* Table Header */}
         <div
           style={{
