@@ -280,22 +280,42 @@ export const HabitTrackerView = ({
   return (
     <div style={{ flex: 1, overflowY: 'auto', padding: '32px 36px', width: '100%', maxWidth: 1200, margin: '0 auto' }}>
       {/* Header Section */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20, flexWrap: 'wrap', gap: 16 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 28, flexWrap: 'wrap', gap: 16 }}>
         <div>
-          <h1 style={{ fontSize: '1.35rem', fontWeight: 700, color: 'var(--flow-text-main)', margin: 0, letterSpacing: '-0.02em' }}>
-            Habit Tracker
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+            <span
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 5,
+                background: 'rgba(239, 68, 68, 0.12)',
+                color: '#ef4444',
+                padding: '3px 9px',
+                borderRadius: 999,
+                fontSize: '0.74rem',
+                fontWeight: 700
+              }}
+            >
+              <Flame size={13} /> Habit Tracker & Routine OS
+            </span>
+            <span style={{ fontSize: '0.78rem', color: 'var(--flow-text-muted)' }}>
+              Produktivitas Pribadi
+            </span>
+          </div>
+          <h1 style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--flow-text-main)', margin: 0, letterSpacing: '-0.02em' }}>
+            Pelacak Kebiasaan & Rutinitas
           </h1>
-          <p style={{ fontSize: '0.82rem', color: 'var(--flow-text-muted)', margin: '3px 0 0' }}>
-            Pantau konsistensi dan progres rutinitas harian Anda.
+          <p style={{ fontSize: '0.88rem', color: 'var(--flow-text-subtle)', margin: '4px 0 0' }}>
+            Bangun disiplin harian, rawat streak positif, dan raih target skripsi serta karier tanpa burnout.
           </p>
         </div>
 
         <button
           className="flow-btn flow-btn-primary"
           onClick={handleOpenAdd}
-          style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '7px 14px', fontSize: '0.82rem', fontWeight: 600, borderRadius: 6 }}
+          style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 18px', fontWeight: 700, borderRadius: 10 }}
         >
-          <Plus size={15} />
+          <Plus size={16} />
           <span>Tambah Kebiasaan</span>
         </button>
       </div>
@@ -304,9 +324,9 @@ export const HabitTrackerView = ({
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-          gap: 12,
-          marginBottom: 20
+          gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+          gap: 16,
+          marginBottom: 28
         }}
       >
         {/* Metric 1: Today's Completion */}
@@ -314,40 +334,52 @@ export const HabitTrackerView = ({
           style={{
             background: 'var(--flow-bg-surface)',
             border: '1px solid var(--flow-border-subtle)',
-            borderRadius: 10,
-            padding: '14px 16px',
+            borderRadius: 14,
+            padding: '18px 20px',
+            boxShadow: 'var(--flow-shadow-sm)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between'
           }}
         >
           <div>
-            <div style={{ fontSize: '0.72rem', color: 'var(--flow-text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+            <div style={{ fontSize: '0.76rem', color: 'var(--flow-text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
               Target Hari Ini
             </div>
-            <div style={{ fontSize: '1.35rem', fontWeight: 700, color: 'var(--flow-text-main)', margin: '3px 0', letterSpacing: '-0.02em' }}>
-              {todayStats.completed} <span style={{ fontSize: '0.88rem', fontWeight: 500, color: 'var(--flow-text-muted)' }}>/ {todayStats.total}</span>
+            <div style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--flow-text-main)', margin: '4px 0' }}>
+              {todayStats.completed} <span style={{ fontSize: '1rem', fontWeight: 500, color: 'var(--flow-text-muted)' }}>/ {todayStats.total}</span>
             </div>
-            <div style={{ fontSize: '0.74rem', color: 'var(--flow-text-subtle)' }}>
-              {todayStats.percent}% tercapai
+            <div style={{ fontSize: '0.78rem', color: todayStats.percent === 100 ? 'var(--flow-accent-emerald)' : 'var(--flow-text-subtle)', fontWeight: 600 }}>
+              {todayStats.percent === 100 ? '✨ 100% Selesai Sempurna!' : `${todayStats.percent}% tercapai`}
             </div>
           </div>
           <div
             style={{
-              width: 38,
-              height: 38,
-              borderRadius: 8,
-              background: 'var(--flow-bg-elevated)',
-              border: '1px solid var(--flow-border-subtle)',
+              width: 52,
+              height: 52,
+              borderRadius: '50%',
+              background: `conic-gradient(var(--flow-primary) ${todayStats.percent * 3.6}deg, rgba(99, 102, 241, 0.12) 0deg)`,
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '0.76rem',
-              fontWeight: 700,
-              color: 'var(--flow-text-main)'
+              justifyContent: 'center'
             }}
           >
-            {todayStats.percent}%
+            <div
+              style={{
+                width: 40,
+                height: 40,
+                borderRadius: '50%',
+                background: 'var(--flow-bg-surface)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontWeight: 800,
+                fontSize: '0.76rem',
+                color: 'var(--flow-primary)'
+              }}
+            >
+              {todayStats.percent}%
+            </div>
           </div>
         </div>
 
@@ -356,38 +388,38 @@ export const HabitTrackerView = ({
           style={{
             background: 'var(--flow-bg-surface)',
             border: '1px solid var(--flow-border-subtle)',
-            borderRadius: 10,
-            padding: '14px 16px',
+            borderRadius: 14,
+            padding: '18px 20px',
+            boxShadow: 'var(--flow-shadow-sm)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between'
           }}
         >
           <div>
-            <div style={{ fontSize: '0.72rem', color: 'var(--flow-text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-              Streak Terbaik
+            <div style={{ fontSize: '0.76rem', color: 'var(--flow-text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+              Streak Tertinggi
             </div>
-            <div style={{ fontSize: '1.35rem', fontWeight: 700, color: 'var(--flow-text-main)', margin: '3px 0', letterSpacing: '-0.02em' }}>
-              {maxStreak} Hari
+            <div style={{ fontSize: '1.6rem', fontWeight: 800, color: '#f59e0b', margin: '4px 0' }}>
+              🔥 {maxStreak} Hari
             </div>
-            <div style={{ fontSize: '0.74rem', color: 'var(--flow-text-subtle)' }}>
-              Konsistensi terpanjang
+            <div style={{ fontSize: '0.78rem', color: 'var(--flow-text-subtle)' }}>
+              Konsistensi tanpa henti
             </div>
           </div>
           <div
             style={{
-              width: 38,
-              height: 38,
-              borderRadius: 8,
-              background: 'var(--flow-bg-elevated)',
-              border: '1px solid var(--flow-border-subtle)',
-              color: 'var(--flow-text-muted)',
+              width: 48,
+              height: 48,
+              borderRadius: 12,
+              background: 'rgba(245, 158, 11, 0.12)',
+              color: '#f59e0b',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center'
             }}
           >
-            <Flame size={18} />
+            <Trophy size={24} />
           </div>
         </div>
 
@@ -396,38 +428,38 @@ export const HabitTrackerView = ({
           style={{
             background: 'var(--flow-bg-surface)',
             border: '1px solid var(--flow-border-subtle)',
-            borderRadius: 10,
-            padding: '14px 16px',
+            borderRadius: 14,
+            padding: '18px 20px',
+            boxShadow: 'var(--flow-shadow-sm)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between'
           }}
         >
           <div>
-            <div style={{ fontSize: '0.72rem', color: 'var(--flow-text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+            <div style={{ fontSize: '0.76rem', color: 'var(--flow-text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
               Kebiasaan Aktif
             </div>
-            <div style={{ fontSize: '1.35rem', fontWeight: 700, color: 'var(--flow-text-main)', margin: '3px 0', letterSpacing: '-0.02em' }}>
+            <div style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--flow-text-main)', margin: '4px 0' }}>
               {habits.length} Rutinitas
             </div>
-            <div style={{ fontSize: '0.74rem', color: 'var(--flow-text-subtle)' }}>
-              {new Set(habits.map((h) => h.category)).size} kategori aktif
+            <div style={{ fontSize: '0.78rem', color: 'var(--flow-text-subtle)' }}>
+              Tersebar di {new Set(habits.map((h) => h.category)).size} pilar hidup
             </div>
           </div>
           <div
             style={{
-              width: 38,
-              height: 38,
-              borderRadius: 8,
-              background: 'var(--flow-bg-elevated)',
-              border: '1px solid var(--flow-border-subtle)',
-              color: 'var(--flow-text-muted)',
+              width: 48,
+              height: 48,
+              borderRadius: 12,
+              background: 'rgba(16, 185, 129, 0.12)',
+              color: 'var(--flow-accent-emerald)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center'
             }}
           >
-            <Target size={18} />
+            <Award size={24} />
           </div>
         </div>
       </div>
@@ -719,21 +751,22 @@ export const HabitTrackerView = ({
                         onClick={(e) => handleToggleDay(habit.id, d.fullDate, e)}
                         title={`${habit.title}: ${isDone ? 'Selesai' : 'Belum selesai'} pada ${d.name} (${d.fullDate})`}
                         style={{
-                          width: 28,
-                          height: 28,
+                          width: 32,
+                          height: 32,
                           borderRadius: '50%',
                           border: isDone
                             ? 'none'
                             : d.isToday
-                            ? '1.5px dashed var(--flow-primary)'
-                            : '1.5px solid var(--flow-border-subtle)',
-                          background: isDone ? 'var(--flow-text-main)' : 'transparent',
-                          color: isDone ? 'var(--flow-bg-base)' : 'transparent',
+                            ? '2px dashed var(--flow-primary)'
+                            : '2px solid var(--flow-border-subtle)',
+                          background: isDone ? (habit.color || 'var(--flow-accent-emerald)') : 'transparent',
+                          color: isDone ? '#ffffff' : 'transparent',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
                           cursor: 'pointer',
-                          transition: 'all 0.12s ease'
+                          transition: 'all 0.15s ease',
+                          transform: isDone ? 'scale(1.05)' : 'scale(1)'
                         }}
                       >
                         {isDone ? <Check size={16} strokeWidth={3} /> : null}
@@ -749,16 +782,15 @@ export const HabitTrackerView = ({
                       display: 'inline-flex',
                       alignItems: 'center',
                       gap: 4,
-                      fontSize: '0.74rem',
-                      fontWeight: 600,
-                      color: habit.streak > 0 ? 'var(--flow-text-main)' : 'var(--flow-text-muted)',
-                      background: 'var(--flow-bg-elevated)',
-                      border: '1px solid var(--flow-border-subtle)',
-                      padding: '2px 8px',
+                      fontSize: '0.78rem',
+                      fontWeight: 800,
+                      color: habit.streak > 0 ? '#f59e0b' : 'var(--flow-text-muted)',
+                      background: habit.streak > 0 ? 'rgba(245, 158, 11, 0.12)' : 'var(--flow-bg-elevated)',
+                      padding: '3px 8px',
                       borderRadius: 999
                     }}
                   >
-                    <Flame size={11} color={habit.streak > 0 ? '#f59e0b' : 'var(--flow-text-muted)'} />
+                    <Flame size={12} fill={habit.streak > 0 ? '#f59e0b' : 'none'} />
                     {habit.streak || 0}d
                   </span>
                 </div>
@@ -786,6 +818,44 @@ export const HabitTrackerView = ({
             );
           })
         )}
+      </div>
+
+      {/* Motivation Banner at Bottom */}
+      <div
+        style={{
+          marginTop: 28,
+          padding: '18px 24px',
+          borderRadius: 14,
+          background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.08), rgba(6, 182, 212, 0.08))',
+          border: '1px solid rgba(99, 102, 241, 0.2)',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 16
+        }}
+      >
+        <div
+          style={{
+            width: 44,
+            height: 44,
+            borderRadius: 12,
+            background: 'var(--flow-pilot-gradient)',
+            color: '#fff',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0
+          }}
+        >
+          <Sparkles size={22} />
+        </div>
+        <div>
+          <div style={{ fontSize: '0.92rem', fontWeight: 800, color: 'var(--flow-text-main)' }}>
+            Tips Kebiasaan Atomik (Atomic Habits)
+          </div>
+          <div style={{ fontSize: '0.82rem', color: 'var(--flow-text-subtle)', marginTop: 2 }}>
+            "Anda tidak naik ke tingkat tujuan Anda, melainkan jatuh ke tingkat sistem Anda. Cukup lakukan progres 1% lebih baik setiap hari."
+          </div>
+        </div>
       </div>
 
       {/* Modal: Add/Edit Habit */}
