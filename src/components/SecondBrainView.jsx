@@ -239,43 +239,23 @@ export const SecondBrainView = ({
   return (
     <div style={{ flex: 1, overflowY: 'auto', padding: '32px 36px', width: '100%', maxWidth: 1200, margin: '0 auto' }}>
       {/* Header Section */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24, flexWrap: 'wrap', gap: 16 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20, flexWrap: 'wrap', gap: 16 }}>
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-            <span
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 5,
-                background: 'rgba(99, 102, 241, 0.12)',
-                color: 'var(--flow-primary)',
-                padding: '3px 9px',
-                borderRadius: 999,
-                fontSize: '0.74rem',
-                fontWeight: 700
-              }}
-            >
-              <Brain size={13} /> Second Brain • P.A.R.A Method
-            </span>
-            <span style={{ fontSize: '0.78rem', color: 'var(--flow-text-muted)' }}>
-              Pusat Pengetahuan Digital
-            </span>
-          </div>
-          <h1 style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--flow-text-main)', margin: 0, letterSpacing: '-0.02em' }}>
-            Second Brain & Knowledge Hub
+          <h1 style={{ fontSize: '1.35rem', fontWeight: 700, color: 'var(--flow-text-main)', margin: 0, letterSpacing: '-0.02em' }}>
+            Second Brain
           </h1>
-          <p style={{ fontSize: '0.88rem', color: 'var(--flow-text-subtle)', margin: '4px 0 0' }}>
-            Simpan ide, materi riset skripsi, bank referensi, dan rangkuman penting agar otak Anda bebas berpikir jernih.
+          <p style={{ fontSize: '0.82rem', color: 'var(--flow-text-muted)', margin: '3px 0 0' }}>
+            Bank ide, riset proyek, dan dokumentasi terstruktur.
           </p>
         </div>
 
         <button
           className="flow-btn flow-btn-primary"
           onClick={handleOpenAdd}
-          style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 18px', fontWeight: 700, borderRadius: 10 }}
+          style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '7px 14px', fontSize: '0.82rem', fontWeight: 600, borderRadius: 6 }}
         >
-          <Plus size={16} />
-          <span>Buat Catatan Baru</span>
+          <Plus size={15} />
+          <span>Buat Catatan</span>
         </button>
       </div>
 
@@ -284,33 +264,18 @@ export const SecondBrainView = ({
         style={{
           background: 'var(--flow-bg-surface)',
           border: '1px solid var(--flow-border-subtle)',
-          borderRadius: 14,
-          padding: '14px 18px',
-          boxShadow: 'var(--flow-shadow-sm)',
-          marginBottom: 24,
+          borderRadius: 8,
+          padding: '8px 14px',
+          marginBottom: 16,
           display: 'flex',
           alignItems: 'center',
-          gap: 12
+          gap: 10
         }}
       >
-        <div
-          style={{
-            width: 36,
-            height: 36,
-            borderRadius: 10,
-            background: 'var(--flow-pilot-gradient)',
-            color: '#fff',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            flexShrink: 0
-          }}
-        >
-          <Sparkles size={18} />
-        </div>
+        <FileText size={15} color="var(--flow-text-muted)" style={{ flexShrink: 0 }} />
         <input
           type="text"
-          placeholder="⚡ Quick Capture: Ketik ide, link referensi, atau kutipan penting lalu tekan Enter..."
+          placeholder="Catat ide kilat atau kutipan penting lalu tekan Enter..."
           value={quickCaptureText}
           onChange={(e) => setQuickCaptureText(e.target.value)}
           onKeyDown={handleQuickCapture}
@@ -319,22 +284,24 @@ export const SecondBrainView = ({
             border: 'none',
             outline: 'none',
             background: 'transparent',
-            fontSize: '0.9rem',
+            fontSize: '0.84rem',
             color: 'var(--flow-text-main)'
           }}
         />
-        <span style={{ fontSize: '0.72rem', color: 'var(--flow-text-muted)', fontWeight: 600, padding: '2px 8px', borderRadius: 4, background: 'var(--flow-bg-elevated)' }}>
+        <span style={{ fontSize: '0.68rem', color: 'var(--flow-text-muted)', fontWeight: 600, padding: '2px 6px', borderRadius: 4, background: 'var(--flow-bg-elevated)', border: '1px solid var(--flow-border-subtle)' }}>
           Enter ↵
         </span>
       </div>
 
-      {/* P.A.R.A Method Navigation Tabs */}
+      {/* P.A.R.A Method Segmented Tabs */}
       <div
         style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-          gap: 12,
-          marginBottom: 20
+          display: 'flex',
+          alignItems: 'center',
+          gap: 6,
+          overflowX: 'auto',
+          marginBottom: 16,
+          paddingBottom: 2
         }}
       >
         {PARA_TABS.map((tab) => {
@@ -343,41 +310,30 @@ export const SecondBrainView = ({
           const count = tab.id === 'all' ? notes.length : notes.filter((n) => n.paraCategory === tab.id).length;
 
           return (
-            <div
+            <button
               key={tab.id}
+              type="button"
               onClick={() => setActiveParaTab(tab.id)}
               style={{
-                padding: '12px 14px',
-                borderRadius: 12,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 6,
+                padding: '6px 12px',
+                borderRadius: 6,
+                border: isActive ? '1px solid var(--flow-text-main)' : '1px solid var(--flow-border-subtle)',
+                background: isActive ? 'var(--flow-text-main)' : 'var(--flow-bg-surface)',
+                color: isActive ? 'var(--flow-bg-base)' : 'var(--flow-text-subtle)',
+                fontSize: '0.78rem',
+                fontWeight: 600,
                 cursor: 'pointer',
-                background: isActive ? 'var(--flow-bg-surface)' : 'var(--flow-bg-elevated)',
-                border: isActive ? '2px solid var(--flow-primary)' : '1px solid var(--flow-border-subtle)',
-                boxShadow: isActive ? '0 4px 12px rgba(99, 102, 241, 0.15)' : 'none',
-                transition: 'all 0.18s ease'
+                transition: 'all 0.12s ease',
+                whiteSpace: 'nowrap'
               }}
             >
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 7, fontWeight: 700, fontSize: '0.86rem', color: isActive ? 'var(--flow-primary)' : 'var(--flow-text-main)' }}>
-                  <Icon size={15} />
-                  <span>{tab.label}</span>
-                </div>
-                <span
-                  style={{
-                    fontSize: '0.7rem',
-                    fontWeight: 800,
-                    padding: '1px 6px',
-                    borderRadius: 999,
-                    background: isActive ? 'rgba(99, 102, 241, 0.15)' : 'var(--flow-border-subtle)',
-                    color: isActive ? 'var(--flow-primary)' : 'var(--flow-text-muted)'
-                  }}
-                >
-                  {count}
-                </span>
-              </div>
-              <div style={{ fontSize: '0.72rem', color: 'var(--flow-text-subtle)', lineHeight: 1.3 }}>
-                {tab.desc}
-              </div>
-            </div>
+              <Icon size={13} />
+              <span>{tab.label.split(' ')[0]}</span>
+              <span style={{ fontSize: '0.7rem', opacity: 0.75 }}>({count})</span>
+            </button>
           );
         })}
       </div>

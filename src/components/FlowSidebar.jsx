@@ -119,7 +119,7 @@ export const FlowSidebar = ({
           {(!isCollapsed || isMobileOpen) && (
             <div>
               <div className="flow-brand-title">KeepWork</div>
-              <div className="flow-brand-subtitle">Productivity OS</div>
+              <div className="flow-brand-subtitle">Workspace</div>
             </div>
           )}
         </div>
@@ -397,7 +397,7 @@ export const FlowSidebar = ({
         {/* Plan Upgrade Pill */}
         <div className="flow-tier-pill" onClick={onOpenUpgradeModal} title="Kelola Paket Pengguna">
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <Rocket size={15} color="var(--flow-primary)" />
+            <Rocket size={14} color="var(--flow-text-muted)" />
             {(!isCollapsed || isMobileOpen) && (
               <div>
                 <div style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--flow-text-main)', textTransform: 'capitalize' }}>

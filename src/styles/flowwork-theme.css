@@ -10,10 +10,9 @@
   --flow-accent-emerald: #10b981;
   --flow-accent-amber: #f59e0b;
   --flow-accent-rose: #f43f5e;
-  --flow-pilot-gradient: linear-gradient(135deg, #6366f1 0%, #06b6d4 50%, #10b981 100%);
-  --flow-card-gradient: linear-gradient(180deg, rgba(255, 255, 255, 0.85) 0%, rgba(255, 255, 255, 0.45) 100%);
-
-  /* Light Theme Surfaces & Text (Minimalist Pure Canvas) */
+  --flow-pilot-gradient: var(--flow-text-main);
+--flow-card-gradient: transparent;
+/* Light Theme Surfaces & Text (Minimalist Pure Canvas) */
   --flow-bg-canvas: #fbfcfd;
   --flow-bg-base: #fbfcfd;
   --flow-bg-surface: #ffffff;
@@ -48,7 +47,7 @@
   --flow-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.4);
   --flow-shadow-md: 0 4px 18px -2px rgba(0, 0, 0, 0.5);
   --flow-shadow-lg: 0 12px 32px -4px rgba(0, 0, 0, 0.65);
-  --flow-card-gradient: linear-gradient(180deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0) 100%);
+  --flow-card-gradient: transparent;
 }
 
 /* Base Shell */
@@ -96,17 +95,17 @@
 }
 
 .flow-logo-mark {
-  width: 28px;
-  height: 28px;
-  border-radius: 8px;
-  background: var(--flow-pilot-gradient);
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  background: var(--flow-text-main);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #fff;
-  font-weight: 800;
-  font-size: 0.85rem;
-  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.35);
+  color: var(--flow-bg-base);
+  font-weight: 700;
+  font-size: 0.82rem;
+  letter-spacing: -0.02em;
 }
 
 .flow-brand-title {
@@ -117,9 +116,10 @@
 }
 
 .flow-brand-subtitle {
-  font-size: 0.68rem;
-  font-weight: 600;
-  color: var(--flow-accent-cyan);
+  font-size: 0.65rem;
+  font-weight: 500;
+  color: var(--flow-text-muted);
+  letter-spacing: 0.02em;
 }
 
 .flow-sidebar-body {
@@ -190,11 +190,11 @@
   align-items: center;
   justify-content: space-between;
   padding: 8px 10px;
-  background: var(--flow-card-gradient);
+  background: var(--flow-bg-surface);
   border: 1px solid var(--flow-border-subtle);
-  border-radius: 10px;
+  border-radius: 8px;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all 0.12s ease;
 }
 
 .flow-tier-pill:hover {
@@ -261,16 +261,15 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 5px 12px;
-  border-radius: 8px;
-  background: var(--flow-pilot-gradient);
-  color: #ffffff;
-  font-size: 0.8rem;
-  font-weight: 600;
-  border: none;
+  padding: 5px 10px;
+  border-radius: 6px;
+  background: var(--flow-bg-elevated);
+  color: var(--flow-text-main);
+  font-size: 0.78rem;
+  font-weight: 500;
+  border: 1px solid var(--flow-border-subtle);
   cursor: pointer;
-  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
-  transition: opacity 0.15s ease, transform 0.12s ease;
+  transition: all 0.12s ease;
 }
 
 .flow-pilot-trigger:hover {
@@ -283,16 +282,15 @@
   align-items: center;
   justify-content: center;
   gap: 6px;
-  padding: 7px 14px;
-  border-radius: 8px;
-  background: var(--flow-primary);
-  color: #ffffff !important;
-  font-size: 0.82rem;
+  padding: 6px 12px;
+  border-radius: 6px;
+  background: var(--flow-text-main);
+  color: var(--flow-bg-base) !important;
+  font-size: 0.8rem;
   font-weight: 600;
-  border: 1px solid transparent;
+  border: 1px solid var(--flow-text-main);
   cursor: pointer;
-  box-shadow: 0 2px 6px rgba(99, 102, 241, 0.28);
-  transition: all 0.15s ease;
+  transition: opacity 0.15s ease;
   white-space: nowrap;
   user-select: none;
 }
@@ -2986,9 +2984,18 @@
 }
 
 .flow-btn-primary {
-  background: linear-gradient(135deg, var(--flow-primary), #8b5cf6) !important;
-  color: #ffffff !important;
-  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3) !important;
+  background: var(--flow-text-main) !important;
+  color: var(--flow-bg-base) !important;
+  border: 1px solid var(--flow-text-main) !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05) !important;
+  border-radius: 6px !important;
+  font-weight: 600 !important;
+}
+
+.flow-btn-primary:hover {
+  opacity: 0.9 !important;
+  transform: none !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08) !important;
 }
 
 .flow-btn-primary:hover {
