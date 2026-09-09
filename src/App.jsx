@@ -43,6 +43,7 @@ import { ShortcutsModal } from './components/ShortcutsModal';
 import { ConfirmModal } from './components/ConfirmModal';
 import { AuthPage } from './components/AuthPage';
 import { ProfileModal } from './components/ProfileModal';
+import { getInitialModule, updateUrlForModule, ROUTE_TO_MODULE, MODULE_TITLES } from './utils/routeHelper';
 import {
   supabase,
   isSupabaseConfigured,
@@ -279,8 +280,33 @@ export function App() {
   const [channelChat, setChannelChat] = useState({ isOpen: false, channelName: '' });
   const [cloudSyncStatus, setCloudSyncStatus] = useState('synced'); // 'synced' | 'syncing' | 'offline'
 
-  // FlowWork Shell modules: 'dashboards' | 'spaces' | 'home' | 'planner' | 'brain' | 'teams'
-  const [activeModule, setActiveModule] = useState('dashboards');
+  // FlowWork Shell modules: 'dashboards' | 'spaces' | 'home' | 'planner' | 'brain' | 'teams' | 'habits' | 'second-brain'
+  const [activeModule, setActiveModule] = useState(getInitialModule);
+
+  // Modern HTML5 History Navigation (without '#')
+  const handleNavigateModule = (mod, replace = false) => {
+    setActiveModule(mod);
+    updateUrlForModule(mod, replace);
+  };
+
+  // Sync browser Back/Forward (PopState) and tab title
+  useEffect(() => {
+    const handlePopState = (e) => {
+      const rawPath = window.location.pathname.toLowerCase();
+      const path = rawPath.length > 1 ? rawPath.replace(/\/$/, '') : rawPath;
+      const targetMod = ROUTE_TO_MODULE[path] || (e.state && e.state.module) || 'dashboards';
+      setActiveModule(targetMod);
+      const title = MODULE_TITLES[targetMod] || 'KeepWork — OS Produktivitas';
+      document.title = title;
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    updateUrlForModule(activeModule, true);
+
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, []);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
@@ -1952,7 +1978,7 @@ export function App() {
       <FlowSidebar
         activeModule={activeModule}
         setActiveModule={(mod) => {
-          setActiveModule(mod);
+          handleNavigateModule(mod);
           setIsMobileSidebarOpen(false);
         }}
         isCollapsed={isSidebarCollapsed}
@@ -2007,7 +2033,7 @@ export function App() {
           setWorkspaceName={setWorkspaceName}
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
-          onOpenFlowPilot={() => setActiveModule('brain')}
+          onOpenFlowPilot={() => handleNavigateModule('brain')}
           onOpenNewTask={handleOpenNewTask}
           theme={theme}
           toggleTheme={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
@@ -2015,7 +2041,7 @@ export function App() {
           pomodoroSeconds={seconds}
           isTimerRunning={isRunning}
           onOpenPomodoro={() => {
-            setActiveModule('spaces');
+            handleNavigateModule('spaces');
             setSpaceSubView('pomodoro');
           }}
           onOpenInviteModal={() => setIsInviteModalOpen(true)}
@@ -2108,7 +2134,7 @@ export function App() {
             onUpdateNotes={handleUpdateSecondBrainNotes}
             onConvertToTask={handleConvertNoteToTask}
             onAddToast={addToast}
-            onOpenFlowPilot={() => setActiveModule('brain')}
+            onOpenFlowPilot={() => handleNavigateModule('brain')}
           />
         )}
 
@@ -2611,7 +2637,7 @@ export function App() {
         tasks={tasks}
         members={members}
         activeModule={activeModule}
-        setActiveModule={setActiveModule}
+        setActiveModule={handleNavigateModule}
         theme={theme}
         toggleTheme={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
         onOpenTaskModal={() => {
@@ -2621,7 +2647,7 @@ export function App() {
         }}
         onOpenInviteModal={() => setIsInviteModalOpen(true)}
         onOpenPomodoro={() => {
-          setActiveModule('spaces');
+          handleNavigateModule('spaces');
           setSpaceSubView('pomodoro');
         }}
         onOpenChannel={(ch) => setChannelChat({ isOpen: true, channelName: ch })}
@@ -2711,7 +2737,7 @@ export function App() {
       <FlowMobileBottomNav
         activeModule={activeModule}
         setActiveModule={(mod) => {
-          setActiveModule(mod);
+          handleNavigateModule(mod);
           setIsMobileSidebarOpen(false);
         }}
         onOpenMobileMenu={() => setIsMobileSidebarOpen(true)}
