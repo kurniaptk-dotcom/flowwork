@@ -24,10 +24,16 @@ import {
   Cloud,
   RefreshCw,
   Edit3,
-  Trash2
+  Trash2,
+  Flame,
+  Brain,
+  TrendingUp,
+  Users,
+  Inbox
 } from 'lucide-react';
 
 export const FlowHeader = ({
+  activeModule = 'dashboards',
   workspaceName = "Kuliah & Studi",
   workspaces = [],
   activeWorkspaceId = 'ws-1',
@@ -151,6 +157,41 @@ export const FlowHeader = ({
             </div>
             <span className="header-workspace-title">{workspaceName}</span>
             <ChevronDown size={13} color="var(--flow-text-muted)" style={{ flexShrink: 0 }} />
+          </div>
+
+          {/* Dynamic Module Breadcrumbs */}
+          <div
+            className="desktop-only-tool header-breadcrumb-group"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6,
+              fontSize: '0.82rem',
+              color: 'var(--flow-text-muted)',
+              marginLeft: 2
+            }}
+          >
+            <span style={{ color: 'var(--flow-border-hover)', fontSize: '0.85rem' }}>/</span>
+            <span style={{ fontWeight: 600, color: 'var(--flow-text-main)', display: 'flex', alignItems: 'center', gap: 6 }}>
+              {activeModule === 'habits' && <Flame size={14} color="#f59e0b" />}
+              {activeModule === 'second-brain' && <Brain size={14} color="#8b5cf6" />}
+              {activeModule === 'dashboards' && <TrendingUp size={14} color="#6366f1" />}
+              {activeModule === 'spaces' && <Layers size={14} color="#06b6d4" />}
+              {activeModule === 'planner' && <Calendar size={14} color="#10b981" />}
+              {activeModule === 'brain' && <Sparkles size={14} color="#6366f1" />}
+              {activeModule === 'teams' && <Users size={14} color="#ec4899" />}
+              {activeModule === 'home' && <Inbox size={14} color="#6366f1" />}
+              <span>
+                {activeModule === 'habits' && 'Habit Tracker'}
+                {activeModule === 'second-brain' && 'Second Brain'}
+                {activeModule === 'dashboards' && 'Dashboard'}
+                {activeModule === 'spaces' && 'Ruang Kerja (Kanban)'}
+                {activeModule === 'planner' && 'Kalender & Planner'}
+                {activeModule === 'brain' && 'KeepWork AI'}
+                {activeModule === 'teams' && 'Tim & Anggota'}
+                {activeModule === 'home' && 'Kotak Masuk'}
+              </span>
+            </span>
           </div>
 
           {/* Calendar Sync Status Indicator (Desktop only) */}

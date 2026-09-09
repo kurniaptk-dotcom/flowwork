@@ -2024,6 +2024,7 @@ export function App() {
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden', minWidth: 0 }}>
         {/* Top Command Center Header Bar */}
         <FlowHeader
+          activeModule={activeModule}
           workspaceName={workspaceName}
           workspaces={workspaces}
           activeWorkspaceId={activeWorkspaceId}

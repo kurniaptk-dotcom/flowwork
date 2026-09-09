@@ -49,6 +49,7 @@ export const SecondBrainView = ({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingNote, setEditingNote] = useState(null);
   const [quickCaptureText, setQuickCaptureText] = useState('');
+  const [readingNote, setReadingNote] = useState(null);
 
   // AI Summary Modal State
   const [aiInsightModal, setAiInsightModal] = useState({ isOpen: false, note: null, content: '', isGenerating: false });
@@ -554,7 +555,7 @@ export const SecondBrainView = ({
 
                     <button
                       className="icon-btn"
-                      onClick={() => handleTogglePin(note.id)}
+                      onClick={(e) => { e.stopPropagation(); handleTogglePin(note.id); }}
                       title={note.pinned ? "Lepas sematan" : "Sematkan di atas"}
                       style={{ width: 26, height: 26, color: note.pinned ? 'var(--flow-primary)' : 'var(--flow-text-muted)' }}
                     >
@@ -571,7 +572,7 @@ export const SecondBrainView = ({
                       lineHeight: 1.4,
                       cursor: 'pointer'
                     }}
-                    onClick={() => handleOpenEdit(note)}
+                    onClick={(e) => { e.stopPropagation(); handleOpenEdit(note); }}
                   >
                     {note.title}
                   </h3>
@@ -642,7 +643,7 @@ export const SecondBrainView = ({
                     <button
                       type="button"
                       className="tab-btn"
-                      onClick={() => handleConvertToTaskAction(note)}
+                      onClick={(e) => { e.stopPropagation(); handleConvertToTaskAction(note); }}
                       title="Ubah catatan ini jadi tugas di Kanban Board"
                       style={{ fontSize: '0.76rem', padding: '3px 8px' }}
                     >
@@ -662,7 +663,7 @@ export const SecondBrainView = ({
                     </button>
                     <button
                       className="icon-btn"
-                      onClick={() => handleDeleteNote(note.id, note.title)}
+                      onClick={(e) => { e.stopPropagation(); handleDeleteNote(note.id, note.title); }}
                       title="Hapus Catatan"
                       style={{ width: 28, height: 28, color: 'var(--flow-accent-rose)' }}
                     >
@@ -673,6 +674,128 @@ export const SecondBrainView = ({
               </div>
             );
           })}
+        </div>
+      )}
+
+      
+      {/* Modal: Note Reader / Full Screen Preview */}
+      {readingNote && (
+        <div className="flow-modal-backdrop" onClick={() => setReadingNote(null)}>
+          <div
+            className="flow-modal-card"
+            style={{ maxWidth: 640 }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flow-modal-header">
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span
+                  className="flow-badge"
+                  style={{
+                    backgroundColor: `${readingNote.color || '#6366f1'}20`,
+                    color: readingNote.color || '#6366f1',
+                    border: `1px solid ${readingNote.color || '#6366f1'}40`,
+                    textTransform: 'uppercase',
+                    fontSize: '0.68rem',
+                    fontWeight: 700
+                  }}
+                >
+                  {readingNote.paraCategory || 'Projects'}
+                </span>
+                {readingNote.pinned && (
+                  <span className="flow-badge flow-badge-amber" style={{ fontSize: '0.68rem' }}>
+                    <Pin size={11} /> Disematkan
+                  </span>
+                )}
+              </div>
+              <button
+                type="button"
+                className="icon-btn"
+                onClick={() => setReadingNote(null)}
+                title="Tutup Modal"
+                style={{ width: 32, height: 32, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            <div style={{ padding: '24px' }}>
+              <h2 style={{ fontSize: '1.35rem', fontWeight: 800, color: 'var(--flow-text-main)', margin: '0 0 12px', lineHeight: 1.35 }}>
+                {readingNote.title}
+              </h2>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: 14, fontSize: '0.76rem', color: 'var(--flow-text-muted)', marginBottom: 20 }}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                  <Clock size={13} />
+                  Diperbarui {new Date(readingNote.updatedAt || readingNote.createdAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
+                </span>
+                {readingNote.tags && readingNote.tags.length > 0 && (
+                  <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <Tag size={13} />
+                    {readingNote.tags.join(', ')}
+                  </span>
+                )}
+              </div>
+
+              {/* Note Content Body */}
+              <div
+                style={{
+                  background: 'var(--flow-bg-elevated)',
+                  border: '1px solid var(--flow-border-subtle)',
+                  borderRadius: 12,
+                  padding: '18px 20px',
+                  color: 'var(--flow-text-main)',
+                  fontSize: '0.92rem',
+                  lineHeight: 1.68,
+                  whiteSpace: 'pre-wrap',
+                  maxHeight: '45vh',
+                  overflowY: 'auto'
+                }}
+              >
+                {readingNote.content || 'Catatan kosong.'}
+              </div>
+
+              {/* Action Buttons */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 22, flexWrap: 'wrap', gap: 10 }}>
+                <button
+                  type="button"
+                  className="flow-btn flow-btn-ghost"
+                  onClick={() => {
+                    navigator.clipboard.writeText(`${readingNote.title}\n\n${readingNote.content}`);
+                    if (onAddToast) onAddToast('Teks catatan berhasil disalin ke clipboard!', 'success');
+                  }}
+                  style={{ fontSize: '0.8rem' }}
+                >
+                  <Copy size={13} /> Salin Teks
+                </button>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <button
+                    type="button"
+                    className="flow-btn flow-btn-ghost"
+                    onClick={() => {
+                      const note = readingNote;
+                      setReadingNote(null);
+                      handleOpenEdit(note);
+                    }}
+                    style={{ fontSize: '0.8rem' }}
+                  >
+                    <Edit3 size={13} /> Edit
+                  </button>
+                  <button
+                    type="button"
+                    className="flow-btn flow-btn-primary"
+                    onClick={() => {
+                      handleConvertToTaskAction(readingNote);
+                      setReadingNote(null);
+                    }}
+                    style={{ fontSize: '0.8rem' }}
+                  >
+                    <CheckCircle2 size={13} /> Jadikan Tugas Kanban
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       )}
 

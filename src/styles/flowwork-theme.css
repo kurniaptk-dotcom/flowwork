@@ -3063,3 +3063,49 @@
 .animate-spin {
   animation: spin 1s linear infinite;
 }
+
+
+/* Mobile Bottom Sheet Drawer for Modals */
+@keyframes slideUpBottom {
+  from {
+    transform: translateY(100%);
+    opacity: 0.7;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@media (max-width: 640px) {
+  .modal-overlay,
+  .flow-modal-backdrop {
+    align-items: flex-end !important;
+    padding: 0 !important;
+  }
+
+  .modal-container,
+  .flow-modal-card {
+    max-width: 100vw !important;
+    width: 100vw !important;
+    max-height: 85vh !important;
+    border-bottom-left-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
+    border-top-left-radius: 20px !important;
+    border-top-right-radius: 20px !important;
+    animation: slideUpBottom 0.22s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    margin: 0 !important;
+  }
+
+  .flow-modal-header {
+    border-top-left-radius: 20px !important;
+    border-top-right-radius: 20px !important;
+  }
+}
+
+/* Card Hover Micro-Interactions */
+.second-brain-note-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--flow-border-hover) !important;
+  box-shadow: var(--flow-shadow-md) !important;
+}

@@ -49,6 +49,8 @@ export const HabitTrackerView = ({
 }) => {
   const [selectedCategory, setSelectedCategory] = useState('Semua');
   const [selectedTimeFilter, setSelectedTimeFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState('all'); // 'all' | 'pending' | 'completed'
+  const [quickAddTitle, setQuickAddTitle] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingHabit, setEditingHabit] = useState(null);
 
@@ -633,7 +635,7 @@ export const HabitTrackerView = ({
                     <div key={d.fullDate} style={{ display: 'flex', justifyContent: 'center' }}>
                       <button
                         type="button"
-                        onClick={() => handleToggleDay(habit.id, d.fullDate)}
+                        onClick={(e) => handleToggleDay(habit.id, d.fullDate, e)}
                         title={`${habit.title}: ${isDone ? 'Selesai' : 'Belum selesai'} pada ${d.name} (${d.fullDate})`}
                         style={{
                           width: 32,
