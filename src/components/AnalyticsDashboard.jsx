@@ -1,5 +1,11 @@
 import React, { useState } from 'react';
+import confetti from 'canvas-confetti';
 import {
+  Search,
+  X,
+  Filter,
+  Circle,
+  CheckCircle,
   CheckCircle2,
   Clock,
   AlertTriangle,
@@ -43,6 +49,11 @@ export const AnalyticsDashboard = ({
   const [selectedTimeframe, setSelectedTimeframe] = useState(timeframe);
   const [aiRebalanced, setAiRebalanced] = useState(false);
   const [simpleFilter, setSimpleFilter] = useState('all'); // all, urgent, in_progress
+  const [selectedStatusFilter, setSelectedStatusFilter] = useState('all'); // 'all' | 'todo' | 'in_progress' | 'review' | 'done'
+  const [selectedPriorityFilter, setSelectedPriorityFilter] = useState('all'); // 'all' | 'urgent_high' | 'urgent' | 'high' | 'normal' | 'low'
+  const [selectedMemberFilter, setSelectedMemberFilter] = useState('all'); // 'all' | memberId/name
+  const [taskSearchQuery, setTaskSearchQuery] = useState('');
+  const [showSubtasksOnly, setShowSubtasksOnly] = useState(false);
   const effectiveMembers = members && members.length > 0 ? members : INITIAL_MEMBERS;
 
   // Filter tasks based on selected timeframe
@@ -82,6 +93,74 @@ export const AnalyticsDashboard = ({
         }
       });
     }
+  });
+
+  // Handle Quick Task Toggle (Done <-> Todo)
+  const handleToggleTaskStatus = (task, e) => {
+    e?.stopPropagation();
+    const newStatus = task.status === 'done' ? 'todo' : 'done';
+    if (onUpdateTaskStatus) {
+      onUpdateTaskStatus(task.id, newStatus);
+    }
+    if (newStatus === 'done') {
+      confetti({ particleCount: 35, spread: 60, origin: { y: 0.65 } });
+      if (onShowToast) onShowToast(`Tugas "${task.title}" berhasil diselesaikan! 🎉`, 'success');
+    } else {
+      if (onShowToast) onShowToast(`Tugas "${task.title}" dipindahkan kembali ke Antrian`, 'info');
+    }
+  };
+
+  // Handle Reset All Filters
+  const handleResetFilters = () => {
+    setSelectedStatusFilter('all');
+    setSelectedPriorityFilter('all');
+    setSelectedMemberFilter('all');
+    setTaskSearchQuery('');
+    setShowSubtasksOnly(false);
+  };
+
+  const isAnyFilterActive =
+    selectedStatusFilter !== 'all' ||
+    selectedPriorityFilter !== 'all' ||
+    selectedMemberFilter !== 'all' ||
+    taskSearchQuery.trim() !== '' ||
+    showSubtasksOnly;
+
+  // Interactive Task List Calculation
+  const interactiveTasks = filteredTasks.filter((t) => {
+    // Status Filter
+    if (selectedStatusFilter === 'in_progress') {
+      if (t.status !== 'in_progress' && t.status !== 'inprogress' && t.status !== 'review') return false;
+    } else if (selectedStatusFilter !== 'all') {
+      if (t.status !== selectedStatusFilter) return false;
+    }
+
+    // Priority Filter
+    if (selectedPriorityFilter === 'urgent_high') {
+      if (t.priority !== 'urgent' && t.priority !== 'high') return false;
+    } else if (selectedPriorityFilter !== 'all') {
+      if (t.priority !== selectedPriorityFilter) return false;
+    }
+
+    // Member Filter
+    if (selectedMemberFilter !== 'all') {
+      const matchMember =
+        t.assignee === selectedMemberFilter ||
+        t.assigneeId === selectedMemberFilter ||
+        (effectiveMembers.find((m) => m.id === selectedMemberFilter)?.name === t.assignee);
+      if (!matchMember) return false;
+    }
+
+    // Search Query
+    if (taskSearchQuery.trim()) {
+      const q = taskSearchQuery.toLowerCase();
+      const matchTitle = t.title?.toLowerCase().includes(q);
+      const matchDesc = t.description?.toLowerCase().includes(q);
+      const matchTag = Array.isArray(t.tags) && t.tags.some((tag) => tag.toLowerCase().includes(q));
+      if (!matchTitle && !matchDesc && !matchTag) return false;
+    }
+
+    return true;
   });
 
   // Sprint Health Score Calculation
@@ -819,20 +898,20 @@ export const AnalyticsDashboard = ({
   };
 
   /* ==========================================================================
-     VIEW 3: PROJECT MANAGEMENT (Executive Analytics & Sprint Burndown)
+     VIEW 3: PROJECT MANAGEMENT (Interactive Analytics & Focus Hub)
      ========================================================================== */
   const renderProjectManagementDashboard = () => {
     return (
-      <div className="flow-analytics-wrapper">
-        {/* 1. Executive Sprint Pulse & AI Health Card */}
-        <div className="flow-ai-health-card">
+      <div className="flow-analytics-wrapper" style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+        {/* 1. Executive Sprint Pulse & Diagnostics Card */}
+        <div className="flow-ai-health-card" style={{ background: 'var(--flow-bg-surface)', border: '1px solid var(--flow-border-subtle)', borderRadius: 14, padding: '20px 24px', boxShadow: 'var(--flow-shadow-sm)' }}>
           <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
-            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14 }}>
-              <div className="flow-health-score-circle">
-                <span style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--flow-primary)' }}>
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16 }}>
+              <div className="flow-health-score-circle" style={{ width: 62, height: 62, borderRadius: '50%', background: 'var(--flow-bg-elevated)', border: '2px solid var(--flow-primary)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <span style={{ fontSize: '1.45rem', fontWeight: 800, color: 'var(--flow-primary)', lineHeight: 1 }}>
                   {healthScore}
                 </span>
-                <span style={{ fontSize: '0.62rem', fontWeight: 700, color: 'var(--flow-text-muted)', textTransform: 'uppercase' }}>
+                <span style={{ fontSize: '0.58rem', fontWeight: 700, color: 'var(--flow-text-muted)', textTransform: 'uppercase', marginTop: 2 }}>
                   Skor / 100
                 </span>
               </div>
@@ -846,134 +925,560 @@ export const AnalyticsDashboard = ({
                       gap: 5,
                       fontSize: '0.74rem',
                       fontWeight: 700,
-                      padding: '2px 8px',
+                      padding: '2px 9px',
                       borderRadius: 999,
                       backgroundColor: `${healthBadgeColor}18`,
-                      color: healthBadgeColor
+                      color: healthBadgeColor,
+                      border: `1px solid ${healthBadgeColor}30`
                     }}
                   >
                     <Activity size={12} />
                     {healthStatus}
                   </span>
                   <span style={{ fontSize: '0.74rem', color: 'var(--flow-text-muted)' }}>
-                    Target Pekan Ini
+                    • Ringkasan Sprint Aktif
                   </span>
                 </div>
 
-                <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: 'var(--flow-text-main)', margin: '6px 0 4px' }}>
-                  KeepWork AI Produktivitas Diagnostics
+                <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--flow-text-main)', margin: '6px 0 4px', letterSpacing: '-0.01em' }}>
+                  KeepWork Diagnostik & Analitik Produktivitas
                 </h3>
-                <p style={{ fontSize: '0.84rem', color: 'var(--flow-text-subtle)', margin: 0, maxWidth: 620, lineHeight: 1.45 }}>
+                <p style={{ fontSize: '0.84rem', color: 'var(--flow-text-subtle)', margin: 0, maxWidth: 650, lineHeight: 1.45 }}>
                   {completedTasks >= 2
-                    ? `Aktivitas berjalan efisien dengan ${completedTasks} tugas terselesaikan. Ritme produktivitas stabil. Terdapat ${reviewTasks} tugas dalam tahap review untuk finalisasi.`
-                    : `Pekan baru dimulai dengan ${todoTasks} tugas aktif. Fokuskan prioritas utama (${urgentTasks} mendesak) untuk menghindari penumpukan menjelang deadline.`}
+                    ? `Aktivitas berjalan efisien dengan ${completedTasks} tugas selesai (${completionRate}%). Terdapat ${inProgressTasks} tugas sedang dikerjakan dan ${reviewTasks} tugas review.`
+                    : `Sprint aktif dengan ${todoTasks} tugas antrian dan ${urgentTasks} tugas mendesak. Klik pada kartu metrik di bawah untuk memfilter daftar tugas secara instan.`}
                 </p>
               </div>
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
               <select
                 className="filter-select"
                 value={selectedTimeframe}
                 onChange={(e) => setSelectedTimeframe(e.target.value)}
-                style={{ fontSize: '0.8rem', padding: '6px 10px' }}
+                style={{ fontSize: '0.8rem', padding: '6px 12px', borderRadius: 8, border: '1px solid var(--flow-border-subtle)', background: 'var(--flow-bg-surface)', color: 'var(--flow-text-main)', cursor: 'pointer' }}
               >
                 <option value="active_sprint">Target Pekan Ini</option>
-                <option value="urgent_only">Prioritas Mendesak & Tinggi Saja</option>
-                <option value="all">Semua Data Tugas</option>
+                <option value="urgent_only">Mendesak Saja</option>
+                <option value="all">Semua Waktu</option>
               </select>
 
               <button
                 className="tab-btn"
                 onClick={handlePrint}
-                style={{ fontSize: '0.8rem', padding: '6px 12px', gap: 6 }}
-                title="Cetak atau simpan laporan ke PDF"
+                style={{ fontSize: '0.8rem', padding: '6px 12px', gap: 6, borderRadius: 8 }}
+                title="Cetak ringkasan ke PDF"
               >
                 <Printer size={14} />
-                <span>Cetak Laporan</span>
+                <span>Cetak</span>
               </button>
             </div>
           </div>
+
+          {/* Interactive Multi-Segmented Progress Bar */}
+          <div style={{ marginTop: 16, paddingTop: 14, borderTop: '1px solid var(--flow-border-subtle)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.78rem', marginBottom: 6, flexWrap: 'wrap', gap: 8 }}>
+              <span style={{ fontWeight: 700, color: 'var(--flow-text-main)', display: 'flex', alignItems: 'center', gap: 6 }}>
+                <TrendingUp size={14} color="var(--flow-accent-emerald)" />
+                Progres Sprint: <span style={{ color: 'var(--flow-accent-emerald)' }}>{completionRate}% Selesai</span>
+              </span>
+              <span style={{ color: 'var(--flow-text-muted)', fontSize: '0.74rem' }}>
+                💡 Klik segmen untuk memfilter: {completedTasks} Selesai • {inProgressTasks} Dikerjakan • {reviewTasks} Review • {todoTasks} Antrian
+              </span>
+            </div>
+
+            <div
+              style={{
+                display: 'flex',
+                height: 10,
+                borderRadius: 999,
+                overflow: 'hidden',
+                backgroundColor: 'var(--flow-bg-elevated)',
+                cursor: 'pointer',
+                border: '1px solid var(--flow-border-subtle)'
+              }}
+              title="Klik segmen warna untuk memfilter tugas"
+            >
+              <div
+                style={{ width: `${totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0}%`, backgroundColor: 'var(--flow-accent-emerald)', transition: 'width 0.3s' }}
+                title={`Selesai: ${completedTasks} tugas`}
+                onClick={() => setSelectedStatusFilter(selectedStatusFilter === 'done' ? 'all' : 'done')}
+              />
+              <div
+                style={{ width: `${totalTasks > 0 ? (inProgressTasks / totalTasks) * 100 : 0}%`, backgroundColor: 'var(--flow-accent-cyan)', transition: 'width 0.3s' }}
+                title={`Sedang Dikerjakan: ${inProgressTasks} tugas`}
+                onClick={() => setSelectedStatusFilter(selectedStatusFilter === 'in_progress' ? 'all' : 'in_progress')}
+              />
+              <div
+                style={{ width: `${totalTasks > 0 ? (reviewTasks / totalTasks) * 100 : 0}%`, backgroundColor: 'var(--flow-primary)', transition: 'width 0.3s' }}
+                title={`Review: ${reviewTasks} tugas`}
+                onClick={() => setSelectedStatusFilter(selectedStatusFilter === 'review' ? 'all' : 'review')}
+              />
+              <div
+                style={{ width: `${totalTasks > 0 ? (todoTasks / totalTasks) * 100 : 0}%`, backgroundColor: 'var(--flow-border-hover)', transition: 'width 0.3s' }}
+                title={`Antrian To Do: ${todoTasks} tugas`}
+                onClick={() => setSelectedStatusFilter(selectedStatusFilter === 'todo' ? 'all' : 'todo')}
+              />
+            </div>
+          </div>
         </div>
 
-        {/* 2. Primary KPI Metric Cards */}
-        <div className="flow-kpi-grid">
-          <div className="flow-kpi-card">
-            <div className="flow-kpi-header">
-              <span className="flow-kpi-title">Tingkat Penyelesaian</span>
-              <div className="flow-kpi-icon-wrap" style={{ color: 'var(--flow-accent-emerald)', backgroundColor: 'rgba(16, 185, 129, 0.12)' }}>
-                <TrendingUp size={16} />
-              </div>
-            </div>
-            <div className="flow-kpi-value">{completionRate}%</div>
-            <div className="flow-kpi-footer">
-              <span style={{ color: 'var(--flow-accent-emerald)', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: 2 }}>
-                <ArrowUpRight size={13} /> +14%
+        {/* 2. Interactive KPI Metric Cards (Clickable Filter Triggers) */}
+        <div className="flow-kpi-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 16 }}>
+          {/* Card 1: Completed */}
+          <div
+            className="flow-kpi-card"
+            onClick={() => {
+              setSelectedStatusFilter(selectedStatusFilter === 'done' ? 'all' : 'done');
+              setSelectedPriorityFilter('all');
+              setSelectedMemberFilter('all');
+              setShowSubtasksOnly(false);
+            }}
+            style={{
+              cursor: 'pointer',
+              borderTop: '3px solid var(--flow-accent-emerald)',
+              boxShadow: selectedStatusFilter === 'done' ? '0 0 0 2px var(--flow-accent-emerald), var(--flow-shadow-md)' : 'var(--flow-shadow-sm)',
+              background: selectedStatusFilter === 'done' ? 'rgba(16, 185, 129, 0.04)' : 'var(--flow-bg-surface)',
+              transition: 'all 0.15s ease'
+            }}
+            title="Klik untuk memfilter tugas yang telah selesai"
+          >
+            <div className="flow-kpi-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+              <span className="flow-kpi-title" style={{ fontSize: '0.74rem', fontWeight: 700, color: 'var(--flow-text-muted)', textTransform: 'uppercase' }}>
+                Tingkat Penyelesaian
               </span>
-              <span style={{ color: 'var(--flow-text-muted)' }}>{completedTasks} dari {totalTasks} tugas selesai</span>
-            </div>
-          </div>
-
-          <div className="flow-kpi-card">
-            <div className="flow-kpi-header">
-              <span className="flow-kpi-title">Tugas Dalam Pengerjaan</span>
-              <div className="flow-kpi-icon-wrap" style={{ color: 'var(--flow-accent-cyan)', backgroundColor: 'rgba(6, 182, 212, 0.12)' }}>
-                <Clock size={16} />
-              </div>
-            </div>
-            <div className="flow-kpi-value">{inProgressTasks}</div>
-            <div className="flow-kpi-footer">
-              <span style={{ color: 'var(--flow-accent-cyan)', fontWeight: 600 }}>Sedang Dikerjakan</span>
-              <span style={{ color: 'var(--flow-text-muted)' }}>+{reviewTasks} di Tahap Review</span>
-            </div>
-          </div>
-
-          <div className="flow-kpi-card">
-            <div className="flow-kpi-header">
-              <span className="flow-kpi-title">Risiko Urgent & Blocked</span>
-              <div className="flow-kpi-icon-wrap" style={{ color: 'var(--flow-accent-rose)', backgroundColor: 'rgba(244, 63, 94, 0.12)' }}>
-                <AlertTriangle size={16} />
-              </div>
-            </div>
-            <div className="flow-kpi-value" style={{ color: urgentTasks > 0 ? 'var(--flow-accent-rose)' : 'inherit' }}>
-              {urgentTasks}
-            </div>
-            <div className="flow-kpi-footer">
-              <span style={{ color: urgentTasks > 0 ? 'var(--flow-accent-rose)' : 'var(--flow-accent-emerald)', fontWeight: 600 }}>
-                {urgentTasks === 0 ? 'Terkontrol' : 'Perlu Eskalasi'}
-              </span>
-              <span style={{ color: 'var(--flow-text-muted)' }}>
-                {urgentTasks === 0 ? 'Tidak ada bottleneck' : 'Prioritas tinggi'}
-              </span>
-            </div>
-          </div>
-
-          <div className="flow-kpi-card">
-            <div className="flow-kpi-header">
-              <span className="flow-kpi-title">Eksekusi Subtask</span>
-              <div className="flow-kpi-icon-wrap" style={{ color: 'var(--flow-primary)', backgroundColor: 'var(--flow-primary-light)' }}>
+              <div className="flow-kpi-icon-wrap" style={{ color: 'var(--flow-accent-emerald)', backgroundColor: 'rgba(16, 185, 129, 0.12)', width: 32, height: 32, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <CheckCircle2 size={16} />
               </div>
             </div>
-            <div className="flow-kpi-value">
-              {completedSubtasks}/{totalSubtasks}
+            <div className="flow-kpi-value" style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--flow-text-main)', letterSpacing: '-0.02em', margin: '2px 0' }}>
+              {completionRate}%
             </div>
-            <div className="flow-kpi-footer">
-              <span style={{ color: 'var(--flow-primary)', fontWeight: 600 }}>
-                {totalSubtasks > 0 ? Math.round((completedSubtasks / totalSubtasks) * 100) : 0}%
+            <div className="flow-kpi-footer" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.74rem', marginTop: 4 }}>
+              <span style={{ color: 'var(--flow-accent-emerald)', fontWeight: 600 }}>
+                {completedTasks} dari {totalTasks} selesai
               </span>
-              <span style={{ color: 'var(--flow-text-muted)' }}>subtask checklist terverifikasi</span>
+              <span style={{ color: selectedStatusFilter === 'done' ? 'var(--flow-accent-emerald)' : 'var(--flow-text-muted)', fontWeight: 600 }}>
+                {selectedStatusFilter === 'done' ? '✓ Aktif' : 'Filter →'}
+              </span>
+            </div>
+          </div>
+
+          {/* Card 2: In Progress */}
+          <div
+            className="flow-kpi-card"
+            onClick={() => {
+              setSelectedStatusFilter(selectedStatusFilter === 'in_progress' ? 'all' : 'in_progress');
+              setSelectedPriorityFilter('all');
+              setSelectedMemberFilter('all');
+              setShowSubtasksOnly(false);
+            }}
+            style={{
+              cursor: 'pointer',
+              borderTop: '3px solid var(--flow-accent-cyan)',
+              boxShadow: selectedStatusFilter === 'in_progress' ? '0 0 0 2px var(--flow-accent-cyan), var(--flow-shadow-md)' : 'var(--flow-shadow-sm)',
+              background: selectedStatusFilter === 'in_progress' ? 'rgba(6, 182, 212, 0.04)' : 'var(--flow-bg-surface)',
+              transition: 'all 0.15s ease'
+            }}
+            title="Klik untuk memfilter tugas yang sedang aktif dikerjakan"
+          >
+            <div className="flow-kpi-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+              <span className="flow-kpi-title" style={{ fontSize: '0.74rem', fontWeight: 700, color: 'var(--flow-text-muted)', textTransform: 'uppercase' }}>
+                Sedang Dikerjakan
+              </span>
+              <div className="flow-kpi-icon-wrap" style={{ color: 'var(--flow-accent-cyan)', backgroundColor: 'rgba(6, 182, 212, 0.12)', width: 32, height: 32, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Clock size={16} />
+              </div>
+            </div>
+            <div className="flow-kpi-value" style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--flow-text-main)', letterSpacing: '-0.02em', margin: '2px 0' }}>
+              {inProgressTasks}
+            </div>
+            <div className="flow-kpi-footer" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.74rem', marginTop: 4 }}>
+              <span style={{ color: 'var(--flow-accent-cyan)', fontWeight: 600 }}>
+                +{reviewTasks} di Tahap Review
+              </span>
+              <span style={{ color: selectedStatusFilter === 'in_progress' ? 'var(--flow-accent-cyan)' : 'var(--flow-text-muted)', fontWeight: 600 }}>
+                {selectedStatusFilter === 'in_progress' ? '✓ Aktif' : 'Filter →'}
+              </span>
+            </div>
+          </div>
+
+          {/* Card 3: Urgent & High Risks */}
+          <div
+            className="flow-kpi-card"
+            onClick={() => {
+              setSelectedPriorityFilter(selectedPriorityFilter === 'urgent_high' ? 'all' : 'urgent_high');
+              setSelectedStatusFilter('all');
+              setSelectedMemberFilter('all');
+              setShowSubtasksOnly(false);
+            }}
+            style={{
+              cursor: 'pointer',
+              borderTop: '3px solid var(--flow-accent-rose)',
+              boxShadow: selectedPriorityFilter === 'urgent_high' ? '0 0 0 2px var(--flow-accent-rose), var(--flow-shadow-md)' : 'var(--flow-shadow-sm)',
+              background: selectedPriorityFilter === 'urgent_high' ? 'rgba(244, 63, 94, 0.04)' : 'var(--flow-bg-surface)',
+              transition: 'all 0.15s ease'
+            }}
+            title="Klik untuk memfilter tugas prioritas mendesak & tinggi"
+          >
+            <div className="flow-kpi-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+              <span className="flow-kpi-title" style={{ fontSize: '0.74rem', fontWeight: 700, color: 'var(--flow-text-muted)', textTransform: 'uppercase' }}>
+                Prioritas Mendesak
+              </span>
+              <div className="flow-kpi-icon-wrap" style={{ color: 'var(--flow-accent-rose)', backgroundColor: 'rgba(244, 63, 94, 0.12)', width: 32, height: 32, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <AlertTriangle size={16} />
+              </div>
+            </div>
+            <div className="flow-kpi-value" style={{ fontSize: '1.6rem', fontWeight: 800, color: urgentTasks > 0 ? 'var(--flow-accent-rose)' : 'inherit', letterSpacing: '-0.02em', margin: '2px 0' }}>
+              {urgentTasks + highTasks}
+            </div>
+            <div className="flow-kpi-footer" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.74rem', marginTop: 4 }}>
+              <span style={{ color: urgentTasks > 0 ? 'var(--flow-accent-rose)' : 'var(--flow-accent-emerald)', fontWeight: 600 }}>
+                {urgentTasks} Urgent • {highTasks} High
+              </span>
+              <span style={{ color: selectedPriorityFilter === 'urgent_high' ? 'var(--flow-accent-rose)' : 'var(--flow-text-muted)', fontWeight: 600 }}>
+                {selectedPriorityFilter === 'urgent_high' ? '✓ Aktif' : 'Filter →'}
+              </span>
+            </div>
+          </div>
+
+          {/* Card 4: Subtasks Execution */}
+          <div
+            className="flow-kpi-card"
+            onClick={() => {
+              setShowSubtasksOnly(!showSubtasksOnly);
+              setSelectedStatusFilter('all');
+              setSelectedPriorityFilter('all');
+              setSelectedMemberFilter('all');
+            }}
+            style={{
+              cursor: 'pointer',
+              borderTop: '3px solid var(--flow-primary)',
+              boxShadow: showSubtasksOnly ? '0 0 0 2px var(--flow-primary), var(--flow-shadow-md)' : 'var(--flow-shadow-sm)',
+              background: showSubtasksOnly ? 'var(--flow-primary-light)' : 'var(--flow-bg-surface)',
+              transition: 'all 0.15s ease'
+            }}
+            title="Klik untuk membuka checklist subtask"
+          >
+            <div className="flow-kpi-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+              <span className="flow-kpi-title" style={{ fontSize: '0.74rem', fontWeight: 700, color: 'var(--flow-text-muted)', textTransform: 'uppercase' }}>
+                Eksekusi Subtask
+              </span>
+              <div className="flow-kpi-icon-wrap" style={{ color: 'var(--flow-primary)', backgroundColor: 'var(--flow-primary-light)', width: 32, height: 32, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <CheckCircle2 size={16} />
+              </div>
+            </div>
+            <div className="flow-kpi-value" style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--flow-text-main)', letterSpacing: '-0.02em', margin: '2px 0' }}>
+              {completedSubtasks} / {totalSubtasks}
+            </div>
+            <div className="flow-kpi-footer" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.74rem', marginTop: 4 }}>
+              <span style={{ color: 'var(--flow-primary)', fontWeight: 600 }}>
+                {totalSubtasks > 0 ? Math.round((completedSubtasks / totalSubtasks) * 100) : 0}% Selesai
+              </span>
+              <span style={{ color: showSubtasksOnly ? 'var(--flow-primary)' : 'var(--flow-text-muted)', fontWeight: 600 }}>
+                {showSubtasksOnly ? '✓ Checklist' : 'Detail →'}
+              </span>
             </div>
           </div>
         </div>
 
-        {/* 3. Sprint Burndown Curve & Pipeline Matrix */}
+        {/* 3. Interactive Task Explorer (Focus & Direct Action Table) */}
+        <div style={{ background: 'var(--flow-bg-surface)', border: '1px solid var(--flow-border-subtle)', borderRadius: 14, padding: '20px', boxShadow: 'var(--flow-shadow-sm)' }}>
+          {/* Header & Filter Controls Bar */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12, marginBottom: 16 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <ListTodo size={18} color="var(--flow-primary)" />
+              <h4 style={{ margin: 0, fontSize: '1rem', fontWeight: 800, color: 'var(--flow-text-main)' }}>
+                {showSubtasksOnly ? 'Checklist Subtask Aktif' : 'Eksplorasi Tugas & Aksi Cepat'}
+              </h4>
+              <span style={{ fontSize: '0.74rem', color: 'var(--flow-text-muted)', background: 'var(--flow-bg-elevated)', padding: '2px 8px', borderRadius: 999, fontWeight: 700 }}>
+                {showSubtasksOnly ? activeSubtaskList.length : interactiveTasks.length} tugas
+              </span>
+            </div>
+
+            {/* Filter Reset Button */}
+            {isAnyFilterActive && (
+              <button
+                type="button"
+                onClick={handleResetFilters}
+                className="tab-btn"
+                style={{ fontSize: '0.74rem', padding: '4px 10px', gap: 4, color: 'var(--flow-accent-rose)', borderColor: 'rgba(244, 63, 94, 0.25)' }}
+                title="Hapus semua filter aktif"
+              >
+                <X size={13} />
+                <span>Reset Filter</span>
+              </button>
+            )}
+          </div>
+
+          {/* Search & Segmented Filter Bar */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12, marginBottom: 14 }}>
+            {/* Quick Filter Chips */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, overflowX: 'auto', paddingBottom: 2 }}>
+              {[
+                { id: 'all', label: 'Semua', count: totalTasks },
+                { id: 'urgent_high', label: '🔴 Mendesak', count: urgentTasks + highTasks, isPriority: true },
+                { id: 'in_progress', label: '⏳ Dikerjakan', count: inProgressTasks, isStatus: true },
+                { id: 'todo', label: '📋 Antrian', count: todoTasks, isStatus: true },
+                { id: 'done', label: '✅ Selesai', count: completedTasks, isStatus: true }
+              ].map((chip) => {
+                const isActive = chip.isPriority
+                  ? selectedPriorityFilter === 'urgent_high'
+                  : chip.isStatus
+                  ? selectedStatusFilter === chip.id
+                  : selectedStatusFilter === 'all' && selectedPriorityFilter === 'all' && !showSubtasksOnly;
+
+                return (
+                  <button
+                    key={chip.id}
+                    type="button"
+                    onClick={() => {
+                      if (chip.isPriority) {
+                        setSelectedPriorityFilter(selectedPriorityFilter === 'urgent_high' ? 'all' : 'urgent_high');
+                        setSelectedStatusFilter('all');
+                      } else if (chip.isStatus) {
+                        setSelectedStatusFilter(selectedStatusFilter === chip.id ? 'all' : chip.id);
+                        setSelectedPriorityFilter('all');
+                      } else {
+                        handleResetFilters();
+                      }
+                      setShowSubtasksOnly(false);
+                    }}
+                    style={{
+                      border: isActive ? '1px solid var(--flow-primary)' : '1px solid var(--flow-border-subtle)',
+                      background: isActive ? 'var(--flow-primary-light)' : 'var(--flow-bg-elevated)',
+                      color: isActive ? 'var(--flow-primary)' : 'var(--flow-text-subtle)',
+                      fontWeight: isActive ? 700 : 500,
+                      fontSize: '0.76rem',
+                      padding: '5px 11px',
+                      borderRadius: 6,
+                      cursor: 'pointer',
+                      transition: 'all 0.12s ease',
+                      whiteSpace: 'nowrap'
+                    }}
+                  >
+                    {chip.label} ({chip.count})
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Search Input */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'var(--flow-bg-elevated)', border: '1px solid var(--flow-border-subtle)', borderRadius: 8, padding: '5px 12px', width: 260 }}>
+              <Search size={14} color="var(--flow-text-muted)" />
+              <input
+                type="text"
+                placeholder="Cari tugas di board..."
+                value={taskSearchQuery}
+                onChange={(e) => setTaskSearchQuery(e.target.value)}
+                style={{ border: 'none', background: 'transparent', outline: 'none', fontSize: '0.78rem', color: 'var(--flow-text-main)', width: '100%' }}
+              />
+              {taskSearchQuery && (
+                <button type="button" onClick={() => setTaskSearchQuery('')} style={{ border: 'none', background: 'transparent', cursor: 'pointer', padding: 0 }}>
+                  <X size={13} color="var(--flow-text-muted)" />
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Task List Items / Subtasks View */}
+          {showSubtasksOnly ? (
+            /* Subtask Checklist View */
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {activeSubtaskList.length === 0 ? (
+                <div style={{ textAlign: 'center', padding: '30px 16px', color: 'var(--flow-text-muted)' }}>
+                  <CheckCircle2 size={32} color="var(--flow-accent-emerald)" style={{ margin: '0 auto 6px' }} />
+                  <div style={{ fontWeight: 600, fontSize: '0.86rem', color: 'var(--flow-text-main)' }}>
+                    Semua checklist subtask telah diselesaikan!
+                  </div>
+                </div>
+              ) : (
+                activeSubtaskList.map((sub, sIdx) => (
+                  <div
+                    key={sIdx}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      padding: '10px 14px',
+                      borderRadius: 8,
+                      background: 'var(--flow-bg-elevated)',
+                      border: '1px solid var(--flow-border-subtle)',
+                      transition: 'all 0.12s ease'
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                      <CheckSquare size={16} color="var(--flow-primary)" />
+                      <div>
+                        <div style={{ fontSize: '0.86rem', fontWeight: 600, color: 'var(--flow-text-main)' }}>
+                          {sub.subtaskTitle}
+                        </div>
+                        <div style={{ fontSize: '0.74rem', color: 'var(--flow-text-muted)' }}>
+                          Bagian dari tugas: <span style={{ color: 'var(--flow-primary)', fontWeight: 500 }}>{sub.taskTitle}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      className="tab-btn"
+                      onClick={() => {
+                        const targetTask = tasks.find((t) => t.id === sub.taskId);
+                        if (targetTask && onTaskClick) onTaskClick(targetTask);
+                      }}
+                      style={{ fontSize: '0.74rem', padding: '3px 8px' }}
+                    >
+                      Buka Tugas →
+                    </button>
+                  </div>
+                ))
+              )}
+            </div>
+          ) : (
+            /* Regular Task Rows */
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {interactiveTasks.length === 0 ? (
+                <div style={{ textAlign: 'center', padding: '36px 16px', color: 'var(--flow-text-muted)' }}>
+                  <CheckCircle2 size={36} color="var(--flow-accent-emerald)" style={{ margin: '0 auto 8px', opacity: 0.8 }} />
+                  <div style={{ fontWeight: 700, fontSize: '0.92rem', color: 'var(--flow-text-main)' }}>
+                    Tidak ada tugas yang sesuai dengan filter
+                  </div>
+                  <p style={{ fontSize: '0.78rem', margin: '4px 0 12px' }}>
+                    Coba sesuaikan kata kunci pencarian atau reset filter.
+                  </p>
+                  {isAnyFilterActive && (
+                    <button type="button" onClick={handleResetFilters} className="flow-pill-btn active" style={{ padding: '4px 12px', fontSize: '0.74rem' }}>
+                      Reset Filter
+                    </button>
+                  )}
+                </div>
+              ) : (
+                interactiveTasks.slice(0, 8).map((task) => {
+                  const isDone = task.status === 'done';
+                  const priorityObj = INITIAL_PRIORITIES[task.priority] || INITIAL_PRIORITIES.normal;
+                  const colObj = columns.find((c) => c.id === task.status);
+
+                  return (
+                    <div
+                      key={task.id}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        padding: '11px 14px',
+                        borderRadius: 10,
+                        background: isDone ? 'rgba(16, 185, 129, 0.03)' : 'var(--flow-bg-elevated)',
+                        border: isDone ? '1px solid rgba(16, 185, 129, 0.2)' : '1px solid var(--flow-border-subtle)',
+                        transition: 'all 0.15s ease',
+                        cursor: 'pointer'
+                      }}
+                      onClick={() => onTaskClick && onTaskClick(task)}
+                    >
+                      {/* Left: Checkbox + Title */}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0, flex: 1, paddingRight: 10 }}>
+                        <button
+                          type="button"
+                          onClick={(e) => handleToggleTaskStatus(task, e)}
+                          style={{
+                            border: 'none',
+                            background: 'transparent',
+                            cursor: 'pointer',
+                            padding: 0,
+                            color: isDone ? 'var(--flow-accent-emerald)' : 'var(--flow-text-muted)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            flexShrink: 0
+                          }}
+                          title={isDone ? 'Tandai belum selesai' : 'Tandai selesai sekarang'}
+                        >
+                          {isDone ? (
+                            <CheckCircle2 size={19} color="var(--flow-accent-emerald)" fill="rgba(16, 185, 129, 0.15)" />
+                          ) : (
+                            <Circle size={19} color="var(--flow-border-hover)" />
+                          )}
+                        </button>
+
+                        <div style={{ minWidth: 0 }}>
+                          <div
+                            style={{
+                              fontSize: '0.88rem',
+                              fontWeight: 600,
+                              color: isDone ? 'var(--flow-text-muted)' : 'var(--flow-text-main)',
+                              textDecoration: isDone ? 'line-through' : 'none',
+                              whiteSpace: 'nowrap',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis'
+                            }}
+                          >
+                            {task.title}
+                          </div>
+                          {task.description && (
+                            <div style={{ fontSize: '0.74rem', color: 'var(--flow-text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                              {task.description}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Right: Badges & Details */}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
+                        {/* Priority Badge */}
+                        <span
+                          style={{
+                            fontSize: '0.7rem',
+                            fontWeight: 700,
+                            padding: '2px 8px',
+                            borderRadius: 6,
+                            color: priorityObj.color,
+                            backgroundColor: `${priorityObj.color}15`,
+                            border: `1px solid ${priorityObj.color}30`
+                          }}
+                        >
+                          {priorityObj.label}
+                        </span>
+
+                        {/* Status Badge */}
+                        {colObj && (
+                          <span
+                            style={{
+                              fontSize: '0.7rem',
+                              fontWeight: 600,
+                              padding: '2px 8px',
+                              borderRadius: 6,
+                              color: colObj.color || 'var(--flow-primary)',
+                              backgroundColor: 'var(--flow-bg-surface)',
+                              border: '1px solid var(--flow-border-subtle)'
+                            }}
+                          >
+                            {colObj.title}
+                          </span>
+                        )}
+
+                        {/* Subtasks Count */}
+                        {task.subtasks && task.subtasks.length > 0 && (
+                          <span style={{ fontSize: '0.72rem', color: 'var(--flow-text-muted)', display: 'flex', alignItems: 'center', gap: 3 }}>
+                            <CheckSquare size={12} />
+                            {task.subtasks.filter((s) => s.completed).length}/{task.subtasks.length}
+                          </span>
+                        )}
+
+                        <ChevronRight size={15} color="var(--flow-text-muted)" />
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* 4. Sprint Burndown Curve & Pipeline Breakdown */}
         <div className="flow-charts-split">
           {/* Sprint Burndown Curve */}
-          <div className="flow-chart-panel">
+          <div className="flow-chart-panel" style={{ background: 'var(--flow-bg-surface)', border: '1px solid var(--flow-border-subtle)', borderRadius: 14, padding: '20px', boxShadow: 'var(--flow-shadow-sm)' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
               <div>
-                <h4 style={{ fontSize: '0.94rem', fontWeight: 700, color: 'var(--flow-text-main)', margin: 0 }}>
+                <h4 style={{ fontSize: '0.94rem', fontWeight: 800, color: 'var(--flow-text-main)', margin: 0 }}>
                   Target Burndown Mingguan
                 </h4>
                 <span style={{ fontSize: '0.74rem', color: 'var(--flow-text-muted)' }}>
@@ -1045,64 +1550,41 @@ export const AnalyticsDashboard = ({
             </div>
           </div>
 
-          {/* Status Pipeline & Funnel Breakdown */}
-          <div className="flow-chart-panel">
+          {/* Status Pipeline & Funnel Breakdown (Clickable to Filter) */}
+          <div className="flow-chart-panel" style={{ background: 'var(--flow-bg-surface)', border: '1px solid var(--flow-border-subtle)', borderRadius: 14, padding: '20px', boxShadow: 'var(--flow-shadow-sm)' }}>
             <div style={{ marginBottom: 14 }}>
-              <h4 style={{ fontSize: '0.94rem', fontWeight: 700, color: 'var(--flow-text-main)', margin: 0 }}>
+              <h4 style={{ fontSize: '0.94rem', fontWeight: 800, color: 'var(--flow-text-main)', margin: 0 }}>
                 Status Distribusi Tugas
               </h4>
               <span style={{ fontSize: '0.74rem', color: 'var(--flow-text-muted)' }}>
-                Alur penyelesaian tiket antar kolom status
+                💡 Klik kolom di bawah untuk memfilter daftar tugas
               </span>
             </div>
 
-            {/* Multi-segmented progress bar */}
-            <div
-              style={{
-                display: 'flex',
-                height: 18,
-                borderRadius: 999,
-                overflow: 'hidden',
-                backgroundColor: 'var(--flow-bg-elevated)',
-                marginBottom: 16
-              }}
-            >
-              {columns.map((col) => {
-                const count = filteredTasks.filter((t) => t.status === col.id).length;
-                const pct = totalTasks > 0 ? (count / totalTasks) * 100 : 0;
-                if (pct === 0) return null;
-                return (
-                  <div
-                    key={col.id}
-                    style={{
-                      width: `${pct}%`,
-                      backgroundColor: col.color || 'var(--flow-primary)',
-                      transition: 'width 0.4s ease'
-                    }}
-                    title={`${col.title}: ${count} (${Math.round(pct)}%)`}
-                  />
-                );
-              })}
-            </div>
-
-            {/* Pipeline Legend Grid */}
+            {/* Pipeline Legend Grid (Clickable Filter Cards) */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }}>
               {columns.map((col) => {
                 const count = filteredTasks.filter((t) => t.status === col.id).length;
                 const pct = totalTasks > 0 ? Math.round((count / totalTasks) * 100) : 0;
+                const isColActive = selectedStatusFilter === col.id;
 
                 return (
                   <div
                     key={col.id}
+                    onClick={() => setSelectedStatusFilter(isColActive ? 'all' : col.id)}
                     style={{
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'space-between',
-                      padding: '8px 12px',
+                      padding: '10px 12px',
                       borderRadius: 8,
-                      backgroundColor: 'var(--flow-bg-elevated)',
-                      border: '1px solid var(--flow-border-subtle)'
+                      backgroundColor: isColActive ? 'var(--flow-bg-surface)' : 'var(--flow-bg-elevated)',
+                      border: isColActive ? `2px solid ${col.color || 'var(--flow-primary)'}` : '1px solid var(--flow-border-subtle)',
+                      boxShadow: isColActive ? 'var(--flow-shadow-sm)' : 'none',
+                      cursor: 'pointer',
+                      transition: 'all 0.12s ease'
                     }}
+                    title={`Klik untuk memfilter tugas dengan status ${col.title}`}
                   >
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                       <span style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: col.color || 'var(--flow-primary)' }} />
@@ -1110,7 +1592,7 @@ export const AnalyticsDashboard = ({
                         {col.title}
                       </span>
                     </div>
-                    <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--flow-text-subtle)' }}>
+                    <span style={{ fontSize: '0.8rem', fontWeight: 700, color: isColActive ? (col.color || 'var(--flow-primary)') : 'var(--flow-text-subtle)' }}>
                       {count} ({pct}%)
                     </span>
                   </div>
@@ -1120,36 +1602,50 @@ export const AnalyticsDashboard = ({
           </div>
         </div>
 
-        {/* 4. Priority Matrix & Team Contribution Leaderboard */}
-        <div className="flow-charts-split" style={{ marginTop: 20 }}>
+        {/* 5. Priority Matrix & Team Contribution (Clickable to Filter) */}
+        <div className="flow-charts-split">
           {/* Priority Breakdown */}
-          <div className="flow-chart-panel">
+          <div className="flow-chart-panel" style={{ background: 'var(--flow-bg-surface)', border: '1px solid var(--flow-border-subtle)', borderRadius: 14, padding: '20px', boxShadow: 'var(--flow-shadow-sm)' }}>
             <div style={{ marginBottom: 14 }}>
-              <h4 style={{ fontSize: '0.94rem', fontWeight: 700, color: 'var(--flow-text-main)', margin: 0 }}>
+              <h4 style={{ fontSize: '0.94rem', fontWeight: 800, color: 'var(--flow-text-main)', margin: 0 }}>
                 Beban Berdasarkan Prioritas
               </h4>
               <span style={{ fontSize: '0.74rem', color: 'var(--flow-text-muted)' }}>
-                Identifikasi alokasi fokus terhadap tiket kritis
+                💡 Klik level prioritas untuk memfilter tugas
               </span>
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               {Object.entries(INITIAL_PRIORITIES).map(([key, p]) => {
                 const count = filteredTasks.filter((t) => t.priority === key).length;
                 const pct = totalTasks > 0 ? Math.round((count / totalTasks) * 100) : 0;
+                const isPActive = selectedPriorityFilter === key;
 
                 return (
-                  <div key={key}>
+                  <div
+                    key={key}
+                    onClick={() => setSelectedPriorityFilter(isPActive ? 'all' : key)}
+                    style={{
+                      cursor: 'pointer',
+                      padding: '8px 10px',
+                      borderRadius: 8,
+                      background: isPActive ? 'var(--flow-bg-elevated)' : 'transparent',
+                      border: isPActive ? `1px solid ${p.color}` : '1px solid transparent',
+                      transition: 'all 0.12s ease'
+                    }}
+                    title={`Klik untuk memfilter tugas prioritas ${p.label}`}
+                  >
                     <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', marginBottom: 5 }}>
-                      <span style={{ display: 'flex', alignItems: 'center', gap: 6, color: p.color, fontWeight: 600 }}>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: 6, color: p.color, fontWeight: 700 }}>
                         {p.label}
                       </span>
-                      <span style={{ color: 'var(--flow-text-muted)', fontSize: '0.78rem' }}>
+                      <span style={{ color: 'var(--flow-text-muted)', fontSize: '0.78rem', fontWeight: 600 }}>
                         {count} tugas ({pct}%)
                       </span>
                     </div>
-                    <div className="sidebar-progress-bar" style={{ height: 6, margin: 0, backgroundColor: 'var(--flow-bg-elevated)' }}>
-                      <div className="sidebar-progress-fill" style={{ width: `${pct}%`, backgroundColor: p.color }} />
+
+                    <div className="sidebar-progress-bar" style={{ height: 6, margin: 0, backgroundColor: 'var(--flow-bg-elevated)', borderRadius: 999, overflow: 'hidden' }}>
+                      <div className="sidebar-progress-fill" style={{ width: `${pct}%`, backgroundColor: p.color, height: '100%' }} />
                     </div>
                   </div>
                 );
@@ -1157,14 +1653,14 @@ export const AnalyticsDashboard = ({
             </div>
           </div>
 
-          {/* Team Workload & Contribution */}
-          <div className="flow-chart-panel">
+          {/* Team Workload & Contribution (Clickable Member Filter) */}
+          <div className="flow-chart-panel" style={{ background: 'var(--flow-bg-surface)', border: '1px solid var(--flow-border-subtle)', borderRadius: 14, padding: '20px', boxShadow: 'var(--flow-shadow-sm)' }}>
             <div style={{ marginBottom: 14 }}>
-              <h4 style={{ fontSize: '0.94rem', fontWeight: 700, color: 'var(--flow-text-main)', margin: 0 }}>
+              <h4 style={{ fontSize: '0.94rem', fontWeight: 800, color: 'var(--flow-text-main)', margin: 0 }}>
                 Alokasi & Kontribusi Anggota Tim
               </h4>
               <span style={{ fontSize: '0.74rem', color: 'var(--flow-text-muted)' }}>
-                Produktivitas per kolaborator di sprint ini
+                💡 Klik anggota tim untuk melihat tugas yang ditugaskan kepadanya
               </span>
             </div>
 
@@ -1175,19 +1671,25 @@ export const AnalyticsDashboard = ({
                 );
                 const doneCount = memberTasks.filter((t) => t.status === 'done').length;
                 const memberPct = memberTasks.length > 0 ? Math.round((doneCount / memberTasks.length) * 100) : 0;
+                const isMemberActive = selectedMemberFilter === member.id;
 
                 return (
                   <div
                     key={member.id}
+                    onClick={() => setSelectedMemberFilter(isMemberActive ? 'all' : member.id)}
                     style={{
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'space-between',
                       padding: '8px 12px',
                       borderRadius: 10,
-                      backgroundColor: 'var(--flow-bg-elevated)',
-                      border: '1px solid var(--flow-border-subtle)'
+                      backgroundColor: isMemberActive ? 'var(--flow-bg-surface)' : 'var(--flow-bg-elevated)',
+                      border: isMemberActive ? '2px solid var(--flow-primary)' : '1px solid var(--flow-border-subtle)',
+                      boxShadow: isMemberActive ? 'var(--flow-shadow-sm)' : 'none',
+                      cursor: 'pointer',
+                      transition: 'all 0.12s ease'
                     }}
+                    title={`Klik untuk memfilter tugas yang ditugaskan ke ${member.name}`}
                   >
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                       <div
@@ -1196,7 +1698,13 @@ export const AnalyticsDashboard = ({
                           width: 32,
                           height: 32,
                           fontSize: '0.76rem',
-                          backgroundColor: member.color || 'var(--flow-primary)'
+                          backgroundColor: member.color || 'var(--flow-primary)',
+                          borderRadius: '50%',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          color: '#ffffff',
+                          fontWeight: 700
                         }}
                       >
                         {member.avatar || member.name.charAt(0)}
