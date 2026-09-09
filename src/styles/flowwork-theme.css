@@ -14,6 +14,7 @@
   --flow-card-gradient: linear-gradient(180deg, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0.2) 100%);
 
   /* Light Theme Surfaces & Text */
+  --flow-bg-canvas: #f8fafc;
   --flow-bg-base: #f8fafc;
   --flow-bg-surface: #ffffff;
   --flow-bg-elevated: #f1f5f9;
@@ -34,6 +35,7 @@
 
 [data-theme='dark'] {
   /* Dark Theme Surfaces & Text (Deep Zinc & Obsidian) */
+  --flow-bg-canvas: #090d16;
   --flow-bg-base: #090d16;
   --flow-bg-surface: #0e1526;
   --flow-bg-elevated: #162038;
@@ -2855,3 +2857,209 @@
 
 
 
+
+
+/* ==========================================================================
+   Universal Modal Cards & Components (Habit Tracker, Second Brain, Calendar, etc.)
+   ========================================================================== */
+.modal-overlay,
+.flow-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background-color: rgba(0, 0, 0, 0.65) !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: fadeIn 0.12s ease;
+}
+
+.modal-container,
+.flow-modal-card {
+  width: 100%;
+  max-width: 520px;
+  max-height: 90vh;
+  overflow-y: auto;
+  background-color: var(--flow-bg-surface) !important;
+  border: 1px solid var(--flow-border-subtle) !important;
+  border-radius: 18px !important;
+  box-shadow: var(--flow-shadow-lg), 0 20px 40px -15px rgba(0, 0, 0, 0.3) !important;
+  display: flex;
+  flex-direction: column;
+  animation: modalScaleUp 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  color: var(--flow-text-main) !important;
+  box-sizing: border-box;
+  position: relative;
+}
+
+.flow-modal-header {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  padding: 18px 24px !important;
+  border-bottom: 1px solid var(--flow-border-subtle) !important;
+  background-color: var(--flow-bg-surface) !important;
+  border-top-left-radius: 18px;
+  border-top-right-radius: 18px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Modal Form Controls */
+.flow-modal-card .flow-auth-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--flow-text-main);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.flow-modal-card input[type="text"],
+.flow-modal-card input[type="email"],
+.flow-modal-card input[type="password"],
+.flow-modal-card select,
+.flow-modal-card textarea,
+.flow-modal-card .flow-auth-input {
+  width: 100%;
+  height: 44px;
+  padding: 0 14px !important;
+  border-radius: 10px;
+  border: 1px solid var(--flow-border-subtle);
+  background-color: var(--flow-bg-elevated) !important;
+  color: var(--flow-text-main) !important;
+  font-size: 0.88rem;
+  font-family: inherit;
+  transition: all 0.15s ease;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.flow-modal-card select {
+  cursor: pointer;
+}
+
+.flow-modal-card select option {
+  background-color: var(--flow-bg-surface) !important;
+  color: var(--flow-text-main) !important;
+}
+
+.flow-modal-card textarea,
+.flow-modal-card textarea.flow-auth-input {
+  height: auto !important;
+  min-height: 110px !important;
+  padding: 12px 14px !important;
+  resize: vertical;
+  line-height: 1.5;
+}
+
+.flow-modal-card input[type="text"]:focus,
+.flow-modal-card select:focus,
+.flow-modal-card textarea:focus,
+.flow-modal-card .flow-auth-input:focus {
+  border-color: var(--flow-primary) !important;
+  box-shadow: 0 0 0 3px var(--flow-primary-light) !important;
+  background-color: var(--flow-bg-surface) !important;
+}
+
+/* Flow Buttons System */
+.flow-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 0.84rem !important;
+  font-weight: 600 !important;
+  border-radius: 9px !important;
+  padding: 8px 18px !important;
+  cursor: pointer !important;
+  transition: all 0.15s ease !important;
+  border: none;
+  outline: none;
+  font-family: inherit;
+  text-decoration: none;
+  gap: 6px;
+  box-sizing: border-box;
+}
+
+.flow-btn-primary {
+  background: linear-gradient(135deg, var(--flow-primary), #8b5cf6) !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3) !important;
+}
+
+.flow-btn-primary:hover {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(99, 102, 241, 0.4) !important;
+}
+
+.flow-btn-primary:active {
+  transform: translateY(0);
+}
+
+.flow-btn-ghost {
+  background: var(--flow-bg-elevated) !important;
+  color: var(--flow-text-subtle) !important;
+  border: 1px solid var(--flow-border-subtle) !important;
+}
+
+.flow-btn-ghost:hover {
+  background: var(--flow-bg-surface) !important;
+  color: var(--flow-text-main) !important;
+  border-color: var(--flow-border-hover) !important;
+}
+
+/* Universal Flow Badges */
+.flow-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.flow-badge-cyan {
+  background: rgba(6, 182, 212, 0.14) !important;
+  color: #06b6d4 !important;
+  border: 1px solid rgba(6, 182, 212, 0.25) !important;
+}
+
+.flow-badge-emerald {
+  background: rgba(16, 185, 129, 0.14) !important;
+  color: #10b981 !important;
+  border: 1px solid rgba(16, 185, 129, 0.25) !important;
+}
+
+.flow-badge-amber {
+  background: rgba(245, 158, 11, 0.14) !important;
+  color: #f59e0b !important;
+  border: 1px solid rgba(245, 158, 11, 0.25) !important;
+}
+
+.flow-badge-rose {
+  background: rgba(244, 63, 94, 0.14) !important;
+  color: #f43f5e !important;
+  border: 1px solid rgba(244, 63, 94, 0.25) !important;
+}
+
+.flow-badge-purple {
+  background: rgba(139, 92, 246, 0.14) !important;
+  color: #8b5cf6 !important;
+  border: 1px solid rgba(139, 92, 246, 0.25) !important;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
