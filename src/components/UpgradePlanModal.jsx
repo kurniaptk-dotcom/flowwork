@@ -30,7 +30,7 @@ const PLANS = [
     features: [
       'Semua fitur Gratis Selamanya',
       'Ruang Kerja (Workspace) Tanpa Batas',
-      'KeepWork AI Asisten Belajar & Tugas',
+      'KeepWork AI Asisten Produktivitas',
       'Templat Skripsi, Makalah & Praktikum',
       'Ekspor Laporan PDF & Ringkasan Rapi'
     ]

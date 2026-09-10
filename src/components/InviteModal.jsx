@@ -6,8 +6,8 @@ export const InviteModal = ({ isOpen, onClose, onInviteMember }) => {
 
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
-  const [role, setRole] = useState('Teman Kelompok');
-  const [department, setDepartment] = useState('Teman Kuliah / Studi');
+  const [role, setRole] = useState('Rekan Kolaborasi');
+  const [department, setDepartment] = useState('Rekan Tim');
   const [accessLevel, setAccessLevel] = useState('Member');
   const [capacity, setCapacity] = useState(5);
   const [color, setColor] = useState('#6366f1');
@@ -81,7 +81,7 @@ export const InviteModal = ({ isOpen, onClose, onInviteMember }) => {
                 Undang Kolaborator Baru
               </h3>
               <p style={{ fontSize: '0.75rem', color: 'var(--flow-text-muted)', margin: 0 }}>
-                Tambahkan teman belajar, rekan kelompok, klien, atau partner ke ruang kerja ini
+                Tambahkan rekan tim, kolaborator, klien, atau partner ke ruang kerja ini
               </p>
             </div>
           </div>
@@ -134,7 +134,7 @@ export const InviteModal = ({ isOpen, onClose, onInviteMember }) => {
               <input
                 type="text"
                 className="meta-field-input"
-                placeholder="Contoh: Teman Kelompok, UI Designer, Klien"
+                placeholder="Contoh: Rekan Kerja, UI Designer, Partner, Klien"
                 value={role}
                 onChange={(e) => setRole(e.target.value)}
                 required
@@ -151,7 +151,7 @@ export const InviteModal = ({ isOpen, onClose, onInviteMember }) => {
                 value={department}
                 onChange={(e) => setDepartment(e.target.value)}
               >
-                <option value="Teman Kuliah / Studi">Teman Kuliah / Studi</option>
+                <option value="Teman Kuliah / Studi">Rekan Kuliah / Studi</option>
                 <option value="Partner Proyek & Freelance">Partner Proyek & Freelance</option>
                 <option value="Klien & Pemesan">Klien & Pemesan</option>
                 <option value="Dosen / Mentor Pembimbing">Dosen / Mentor Pembimbing</option>

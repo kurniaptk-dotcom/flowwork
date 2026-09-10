@@ -63,9 +63,9 @@ export const FlowPilotView = ({ tasks = [], onAddTask, onAddToast }) => {
   ]);
 
   const skillsList = [
-    { id: 'weekly-summary', title: 'Evaluasi & Ringkasan Progres Mingguan', desc: 'Ringkasan tugas selesai, kendala/blocker, dan target berikutnya.', prompt: 'Buatkan ringkasan progres belajar dan proyek saat ini, tugas apa yang sudah selesai, dan target prioritas berikutnya.' },
+    { id: 'weekly-summary', title: 'Evaluasi & Ringkasan Progres Mingguan', desc: 'Ringkasan tugas selesai, kendala/blocker, dan target berikutnya.', prompt: 'Buatkan ringkasan progres tugas dan proyek saat ini, tugas apa yang sudah selesai, dan target prioritas berikutnya.' },
     { id: 'task-decomposition', title: 'Breakdown Tugas & Makalah', desc: 'Memecah tugas besar/proyek menjadi checklist langkah praktis.', prompt: 'Bagi tugas proyek atau materi kuliah besar ini menjadi 4 subtask praktis yang siap dikerjakan.' },
-    { id: 'priority-matrix', title: 'Matriks Prioritas Eisenhower', desc: 'Evaluasi tugas mendesak vs penting untuk fokus belajar optimal.', prompt: 'Analisis tugas mana yang harus saya prioritaskan terlebih dahulu berdasarkan batas waktu terdekat.' },
+    { id: 'priority-matrix', title: 'Matriks Prioritas Eisenhower', desc: 'Evaluasi tugas mendesak vs penting untuk produktivitas optimal.', prompt: 'Analisis tugas mana yang harus saya prioritaskan terlebih dahulu berdasarkan batas waktu terdekat.' },
     { id: 'client-report', title: 'Laporan Progres Klien / Dosen', desc: 'Format laporan rapi yang siap dikirim ke klien atau dosen.', prompt: 'Tuliskan draft laporan progres tugas yang sopan dan profesional untuk dikirim ke klien atau dosen pembimbing.' }
   ];
 

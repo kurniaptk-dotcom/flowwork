@@ -138,7 +138,7 @@ export const TeamsHubView = ({
       <div className="flow-team-toolbar">
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <h1 className="flow-team-title">Teman Kolaborasi & Pembagian Tugas</h1>
+            <h1 className="flow-team-title">Rekan Kolaborasi & Pembagian Tugas</h1>
             <span className="flow-team-count-tag">
               {teamMetrics.totalMembers} Kolaborator
             </span>

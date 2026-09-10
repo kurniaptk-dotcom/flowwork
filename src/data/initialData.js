@@ -44,7 +44,7 @@ export const INITIAL_MEMBERS = [
   {
     id: 'alex',
     name: 'Alex Rivera',
-    role: 'Teman Belajar',
+    role: 'Kolaborator',
     avatar: 'AR',
     color: '#6366f1',
     email: 'alex@keepwork.id',
@@ -169,7 +169,7 @@ export const INITIAL_TASKS = [
     subtasks: [
       { id: 'st-12', text: 'Rangkum konsep rekursi & divide and conquer', completed: true },
       { id: 'st-13', text: 'Latihan coding 10 soal algoritma di LeetCode', completed: false },
-      { id: 'st-14', text: 'Diskusi pemecahan soal bersama kelompok belajar', completed: false },
+      { id: 'st-14', text: 'Diskusi perencanaan proyek bersama tim', completed: false },
     ],
     activityLog: [
       { id: 'act-6', text: 'Tugas dijadwalkan menjelang minggu ujian', timestamp: '2 hari lalu' },
@@ -221,7 +221,7 @@ export const INITIAL_TASKS = [
 
 export const INITIAL_NOTES = `📌 Target Fokus Pekan Ini:
 - Prioritas Utama: Bimbingan Bab 2 Skripsi & tuntaskan laporan praktikum Basis Data.
-- Target Harian: Terapkan metode Pomodoro (3 sesi x 25 menit fokus belajar tanpa distrak sosmed).
+- Target Harian: Terapkan metode Pomodoro (3 sesi x 25 menit fokus kerja tanpa distrak sosmed).
 - Pengingat: Cek batas waktu upload e-learning kampus sebelum jam 23:59 WIB!`;
 
 const currentIsoDate = new Date().toISOString().split('T')[0];

@@ -852,7 +852,7 @@ export const FlowHeader = ({
                   }}
                 >
                   <User size={14} />
-                  <span>Ajak Teman Kolaborasi</span>
+                  <span>Ajak Rekan Kolaborasi</span>
                 </div>
 
                 <div

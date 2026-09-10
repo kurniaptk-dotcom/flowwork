@@ -60,7 +60,7 @@ export const FlowSidebar = ({
     { id: 'spaces', label: 'Proyek & Tugas', icon: FolderKanban },
     { id: 'planner', label: 'Jadwal & Kalender', icon: Calendar },
     { id: 'home', label: 'Aktivitas & Inbox', icon: Home },
-    { id: 'teams', label: 'Teman Kolaborasi', icon: Users }
+    { id: 'teams', label: 'Rekan Kolaborasi', icon: Users }
   ];
 
   const personalNavItems = [

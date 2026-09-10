@@ -6,8 +6,8 @@ export const MemberEditModal = ({ isOpen, onClose, member, onSaveMember }) => {
 
   const [name, setName] = useState(member.name || '');
   const [email, setEmail] = useState(member.email || '');
-  const [role, setRole] = useState(member.role || 'Teman Belajar');
-  const [department, setDepartment] = useState(member.department || 'Teman Kuliah / Studi');
+  const [role, setRole] = useState(member.role || 'Kolaborator');
+  const [department, setDepartment] = useState(member.department || 'Rekan Tim');
   const [status, setStatus] = useState(member.status || 'active');
   const [capacity, setCapacity] = useState(member.capacity || 5);
   const [color, setColor] = useState(member.color || '#6366f1');
@@ -16,8 +16,8 @@ export const MemberEditModal = ({ isOpen, onClose, member, onSaveMember }) => {
     if (member) {
       setName(member.name || '');
       setEmail(member.email || '');
-      setRole(member.role || 'Teman Belajar');
-      setDepartment(member.department || 'Teman Kuliah / Studi');
+      setRole(member.role || 'Kolaborator');
+      setDepartment(member.department || 'Rekan Tim');
       setStatus(member.status || 'active');
       setCapacity(member.capacity || 5);
       setColor(member.color || '#6366f1');
@@ -159,7 +159,7 @@ export const MemberEditModal = ({ isOpen, onClose, member, onSaveMember }) => {
                 value={department}
                 onChange={(e) => setDepartment(e.target.value)}
               >
-                <option value="Teman Kuliah / Studi">Teman Kuliah / Studi</option>
+                <option value="Rekan Kuliah / Studi">Rekan Kuliah / Studi</option>
                 <option value="Partner Proyek & Freelance">Partner Proyek & Freelance</option>
                 <option value="Klien & Pemesan">Klien & Pemesan</option>
                 <option value="Dosen / Mentor Pembimbing">Dosen / Mentor Pembimbing</option>

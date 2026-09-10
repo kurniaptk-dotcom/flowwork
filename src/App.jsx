@@ -1223,7 +1223,7 @@ export function App() {
     }
   };
 
-  // Print Laporan Progres Belajar & Proyek
+  // Print Laporan Progres Tugas & Proyek
   const handlePrintSprintReport = () => {
     try {
       const printWindow = window.open('', '_blank');
@@ -1244,7 +1244,7 @@ export function App() {
         <!DOCTYPE html>
         <html>
         <head>
-          <title>Laporan Progres Belajar & Proyek - ${workspaceName}</title>
+          <title>Laporan Progres Tugas & Proyek - ${workspaceName}</title>
           <style>
             body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 32px; color: #1e293b; line-height: 1.5; }
             h1 { font-size: 22px; margin-bottom: 4px; color: #0f172a; }
